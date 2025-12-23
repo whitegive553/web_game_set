@@ -1,0 +1,40 @@
+{
+  "users": [
+    {
+      "id": "79ada627ecc7ec4c7b5b6a8a5c74887a",
+      "username": "123",
+      "passwordHash": "$2b$10$lQ8ZNIW0/a/fBwpIJHXjie./CI.TPpUfxA1AATat5sHtyVz6Rdru6",
+      "createdAt": 1766053187774
+    },
+    {
+      "id": "34b83565e353b116ed653a085a320d52",
+      "username": "aipengze",
+      "passwordHash": "$2b$10$hpaPcJY3PpKHG1cYxDNel.Y1ZUwdE0aCEZ1qBdLKuB731IzTv5kFG",
+      "createdAt": 1766451375290
+    },
+    {
+      "id": "030df312b3ac49f9a3569413af6b5452",
+      "username": "test1",
+      "passwordHash": "$2b$10$xQ9u/1Hcd7MjyZX08Cr/Reij4TSbuSgR5H1BNm2bzy3I0CFLGgzau",
+      "createdAt": 1766461251056
+    },
+    {
+      "id": "9f96550bbe60eed7f24252e78cd6b2ea",
+      "username": "test2",
+      "passwordHash": "$2b$10$4Cnhsp5PZmJBAys18Mo2oulpMAt2u5TTVJN/EOq7RvFeeG51WyGq6",
+      "createdAt": 1766461317341
+    },
+    {
+      "id": "cf16e37178cfb0c65b38165cf198741a",
+      "username": "test3",
+      "passwordHash": "$2b$10$bWwMZ9YiIIbbjsIllahQXeAdZwTqGF4ICbdBdU70eQZp2qhyLjRme",
+      "createdAt": 1766461363476
+    },
+    {
+      "id": "f7aa9b397a34bf5cb73af3b25c12fb02",
+      "username": "test4",
+      "passwordHash": "$2b$10$ifCIz/fhBi5pQpjTKjv.xO57ANNAxqiA/AEu7X.JoB3vqm7MONcOW",
+      "createdAt": 1766461497362
+    }
+  ]
+}

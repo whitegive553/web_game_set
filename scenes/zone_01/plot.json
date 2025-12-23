@@ -1,0 +1,78 @@
+{
+  "sceneId": "zone_01",
+  "acts": [
+    {
+      "actId": "act_1_arrival",
+      "name": "到达禁区边缘",
+      "description": "玩家初次进入禁区边缘，发现异常迹象",
+      "beats": [
+        {
+          "beatId": "beat_1_initial_observation",
+          "description": "观察周围环境，发现第一个异常现象",
+          "mustReveal": ["environment_anomaly", "temperature_drop"],
+          "minStep": 0,
+          "maxStep": 3
+        },
+        {
+          "beatId": "beat_2_first_choice",
+          "description": "玩家必须做出第一个关键决定：前进或观望",
+          "mustReveal": ["compass_malfunction"],
+          "minStep": 2,
+          "maxStep": 5
+        }
+      ]
+    },
+    {
+      "actId": "act_2_discovery",
+      "name": "发现废弃设施",
+      "description": "玩家发现废弃的研究设施入口",
+      "beats": [
+        {
+          "beatId": "beat_3_find_entrance",
+          "description": "发现废弃建筑或洞穴入口",
+          "mustReveal": ["structure_found", "entrance_visible"],
+          "requiredIntent": "move_forward",
+          "minStep": 4,
+          "maxStep": 7
+        },
+        {
+          "beatId": "beat_4_enter_or_retreat",
+          "description": "决定是否进入未知结构",
+          "mustReveal": ["danger_hint", "potential_reward"],
+          "minStep": 6,
+          "maxStep": 9
+        }
+      ]
+    },
+    {
+      "actId": "act_3_climax",
+      "name": "关键遭遇",
+      "description": "玩家遭遇关键事件或异常现象",
+      "beats": [
+        {
+          "beatId": "beat_5_encounter",
+          "description": "遭遇异常现象或关键发现",
+          "mustReveal": ["anomaly_confirmed", "cost_revealed"],
+          "minStep": 8,
+          "maxStep": 12
+        }
+      ]
+    }
+  ],
+  "canonFacts": [
+    "玩家进入了未知禁区",
+    "环境存在异常现象",
+    "指南针受到干扰",
+    "温度异常低于周围"
+  ],
+  "forbiddenClaims": [
+    "玩家已经完全了解禁区",
+    "玩家完全安全",
+    "异常现象已被解释清楚",
+    "玩家获得了完整地图"
+  ],
+  "progressBudget": {
+    "maxStepsPerAct": 5,
+    "totalMaxSteps": 12
+  }
+}

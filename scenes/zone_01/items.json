@@ -1,0 +1,33 @@
+{
+  "items": [
+    {
+      "itemId": "item_001",
+      "name": "异常指南针",
+      "type": "permission",
+      "rarity": "rare",
+      "desc": "一个看起来普通的指南针，但指针会对异常现象做出反应。持有它可以解锁极少数需要精确定位的交互选项。",
+      "meta": {
+        "unlockInput": false,
+        "detectAnomalies": true,
+        "detectionRange": 50
+      },
+      "effects": {
+        "observationLevel": 5
+      }
+    },
+    {
+      "itemId": "item_002",
+      "name": "旧式手电筒",
+      "type": "tool",
+      "rarity": "common",
+      "desc": "一个功能正常的手电筒，电池还有 60% 左右的电量。在低光环境中必不可少。",
+      "meta": {
+        "batteryPercent": 60,
+        "lightRadius": 10
+      },
+      "effects": {
+        "stamina": -2
+      }
+    }
+  ]
+}

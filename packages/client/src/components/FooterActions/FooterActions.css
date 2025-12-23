@@ -1,0 +1,106 @@
+/* FooterActions Styles */
+
+.footer-actions {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(10, 10, 10, 0.9);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.footer-actions__button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: #ccc;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.footer-actions__button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #ff4444;
+  color: #fff;
+}
+
+.footer-actions__button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.footer-actions__button--danger:hover:not(:disabled) {
+  border-color: #ff4444;
+  background: rgba(255, 68, 68, 0.1);
+  color: #ff4444;
+}
+
+.footer-actions__icon {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+}
+
+.footer-actions__badge {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ff4444;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 10px;
+  border: 2px solid rgba(10, 10, 10, 0.9);
+}
+
+.footer-actions__badge--anomalous {
+  background: #ff00ff;
+  animation: anomalous-pulse 2s ease-in-out infinite;
+}
+
+/* Animations */
+@keyframes anomalous-pulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.8);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .footer-actions {
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .footer-actions__button {
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .footer-actions__button span {
+    display: none;
+  }
+
+  .footer-actions__icon {
+    width: 24px;
+    height: 24px;
+  }
+}

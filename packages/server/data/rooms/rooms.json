@@ -1,0 +1,98 @@
+{
+  "rooms": {
+    "room_1766468831521_vt5st1m3i": {
+      "roomId": "room_1766468831521_vt5st1m3i",
+      "gameId": "avalon",
+      "hostUserId": "34b83565e353b116ed653a085a320d52",
+      "name": "123",
+      "maxPlayers": 6,
+      "players": [
+        {
+          "userId": "34b83565e353b116ed653a085a320d52",
+          "username": "aipengze",
+          "ready": true,
+          "connected": true
+        },
+        {
+          "userId": "9f96550bbe60eed7f24252e78cd6b2ea",
+          "username": "test2",
+          "ready": true,
+          "connected": true
+        },
+        {
+          "userId": "030df312b3ac49f9a3569413af6b5452",
+          "username": "test1",
+          "ready": true,
+          "connected": true
+        },
+        {
+          "userId": "cf16e37178cfb0c65b38165cf198741a",
+          "username": "test3",
+          "ready": true,
+          "connected": true
+        },
+        {
+          "userId": "f7aa9b397a34bf5cb73af3b25c12fb02",
+          "username": "test4",
+          "ready": true,
+          "connected": true
+        },
+        {
+          "userId": "79ada627ecc7ec4c7b5b6a8a5c74887a",
+          "username": "123",
+          "ready": true,
+          "connected": true
+        }
+      ],
+      "createdAt": 1766468831521,
+      "status": "playing",
+      "match": {
+        "matchId": "match_1766468933687_gm1c0x3yw",
+        "roomId": "room_1766468831521_vt5st1m3i",
+        "gameId": "avalon",
+        "state": {
+          "phase": "LOBBY"
+        },
+        "players": [
+          {
+            "userId": "34b83565e353b116ed653a085a320d52",
+            "username": "aipengze",
+            "ready": true,
+            "connected": true
+          },
+          {
+            "userId": "9f96550bbe60eed7f24252e78cd6b2ea",
+            "username": "test2",
+            "ready": true,
+            "connected": true
+          },
+          {
+            "userId": "030df312b3ac49f9a3569413af6b5452",
+            "username": "test1",
+            "ready": true,
+            "connected": true
+          },
+          {
+            "userId": "cf16e37178cfb0c65b38165cf198741a",
+            "username": "test3",
+            "ready": true,
+            "connected": true
+          },
+          {
+            "userId": "f7aa9b397a34bf5cb73af3b25c12fb02",
+            "username": "test4",
+            "ready": true,
+            "connected": true
+          },
+          {
+            "userId": "79ada627ecc7ec4c7b5b6a8a5c74887a",
+            "username": "123",
+            "ready": true,
+            "connected": true
+          }
+        ],
+        "createdAt": 1766468933687
+      }
+    }
+  }
+}

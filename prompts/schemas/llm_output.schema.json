@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LLM Output Schema",
+  "description": "Schema for structured output from LLM narrative generation",
+  "type": "object",
+  "required": ["narrative", "choices", "tags"],
+  "properties": {
+    "narrative": {
+      "type": "object",
+      "required": ["text", "source"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 1000,
+          "description": "The narrative text describing current situation"
+        },
+        "source": {
+          "type": "string",
+          "enum": ["environment", "character", "system"],
+          "description": "Source perspective of the narrative"
+        }
+      },
+      "description": "Generated narrative content"
+    },
+    "choices": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": ["id", "text", "riskHint", "intent"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^choice_[0-9]+$",
+            "description": "Unique identifier for this choice (must be unique in this response)"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 200,
+            "description": "The choice text shown to player"
+          },
+          "riskHint": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 100,
+            "description": "Vague risk hint (must not include specific numbers or guaranteed outcomes)"
+          },
+          "intent": {
+            "type": "string",
+            "enum": ["investigate", "move_forward", "retreat", "wait", "use_item", "communicate", "rest", "risky_act"],
+            "description": "Player action intent category - used by rule engine to determine deterministic effects"
+          }
+        }
+      },
+      "description": "List of player choices"
+    },
+    "tags": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_]{2,50}$",
+        "description": "Tag must be lowercase, alphanumeric with underscores, 2-50 characters"
+      },
+      "description": "Descriptive tags for this narrative segment (e.g., 'exploration', 'danger', 'isolation'). LLM can create new tags that fit the atmosphere."
+    }
+  }
+}

@@ -1,0 +1,191 @@
+/* Scene Styles */
+
+.scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  overflow: hidden;
+}
+
+.scene__background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: grayscale(20%);
+}
+
+.scene__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 10, 10, 0.3) 0%,
+    rgba(10, 10, 10, 0.6) 50%,
+    rgba(10, 10, 10, 0.9) 100%
+  );
+  pointer-events: none;
+}
+
+/* Location Badge */
+.scene__location-badge {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  backdrop-filter: blur(10px);
+  z-index: 10;
+}
+
+.scene__location-icon {
+  width: 24px;
+  height: 24px;
+  color: #ff4444;
+}
+
+.scene__location-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 2;
+}
+
+.scene__location-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.scene__location-label {
+  font-size: 0.65rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.scene__location-name {
+  font-size: 0.9rem;
+  color: #fff;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+}
+
+/* Anomaly Hint (subtle, cryptic) */
+.scene__anomaly-hint {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(100, 0, 100, 0.2);
+  border: 1px solid rgba(200, 0, 200, 0.3);
+  border-radius: 4px;
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  opacity: 0.7;
+  animation: anomaly-pulse 3s ease-in-out infinite;
+}
+
+.scene__anomaly-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ff00ff;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.scene__anomaly-text {
+  font-size: 0.75rem;
+  color: #cc88cc;
+  font-style: italic;
+  max-width: 200px;
+}
+
+/* Turn Counter */
+.scene__turn-counter {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  backdrop-filter: blur(5px);
+  z-index: 10;
+}
+
+.scene__turn-label {
+  font-size: 0.7rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.scene__turn-number {
+  font-size: 1.2rem;
+  color: #fff;
+  font-weight: 300;
+}
+
+/* Animations */
+@keyframes anomaly-pulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(-2px);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .scene__location-badge {
+    top: 1rem;
+    right: 1rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .scene__location-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .scene__location-name {
+    font-size: 0.8rem;
+  }
+
+  .scene__turn-counter {
+    top: 1rem;
+    left: 1rem;
+    padding: 0.4rem 0.75rem;
+  }
+
+  .scene__anomaly-hint {
+    bottom: 1rem;
+    right: 1rem;
+    max-width: 150px;
+  }
+}

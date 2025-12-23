@@ -1,0 +1,815 @@
+/**
+ * Avalon Game Styles
+ */
+
+.avalon-game {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+  color: white;
+  padding: 20px;
+}
+
+.avalon-game.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  gap: 20px;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ====================
+   Countdown Screen
+   ==================== */
+
+.avalon-game.countdown-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  animation: fadeIn 0.5s ease-in;
+}
+
+.countdown-screen h1 {
+  font-size: 3rem;
+  margin-bottom: 40px;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+.countdown-number {
+  font-size: 10rem;
+  font-weight: bold;
+  color: #ffd700;
+  text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.countdown-screen p {
+  font-size: 1.5rem;
+  margin-top: 40px;
+  opacity: 0.9;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ====================
+   Role Reveal Screen
+   ==================== */
+
+.avalon-game.role-reveal-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.role-reveal-content {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  animation: slideUp 0.5s ease-out;
+}
+
+.role-reveal-content h1 {
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+.role-reveal-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 40px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  margin-bottom: 30px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+.role-reveal-card.good {
+  border-color: #4caf50;
+  box-shadow: 0 0 30px rgba(76, 175, 80, 0.4);
+}
+
+.role-reveal-card.evil {
+  border-color: #f44336;
+  box-shadow: 0 0 30px rgba(244, 67, 54, 0.4);
+}
+
+.role-name-large {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #ffd700;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+}
+
+.role-team-large {
+  font-size: 1.8rem;
+  margin-bottom: 30px;
+  opacity: 0.9;
+}
+
+.role-special-info {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.info-label {
+  font-size: 1.1rem;
+  margin-bottom: 15px;
+  opacity: 0.8;
+}
+
+.info-player {
+  font-size: 1.3rem;
+  font-weight: bold;
+  padding: 10px;
+  margin: 5px 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.btn-confirm-role {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: white;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-confirm-role:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ====================
+   Header
+   ==================== */
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.game-header h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.phase-indicator {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.header-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.score-display {
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.current-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.user-icon {
+  font-size: 1.1rem;
+}
+
+.btn-exit {
+  padding: 10px 20px;
+  background: rgba(244, 67, 54, 0.8);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+.btn-exit:hover {
+  background: rgba(244, 67, 54, 1);
+}
+
+/* ====================
+   Game Error
+   ==================== */
+
+.game-error {
+  padding: 15px 20px;
+  background: rgba(244, 67, 54, 0.9);
+  border-radius: 10px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: slideDown 0.3s ease;
+}
+
+.game-error button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 10px;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ====================
+   Game Content
+   ==================== */
+
+.game-content {
+  display: grid;
+  grid-template-columns: 200px 1fr 250px;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* ====================
+   Flippable Role Card
+   ==================== */
+
+.role-card-container {
+  position: relative;
+}
+
+.role-card-flip {
+  width: 180px;
+  height: 250px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
+  cursor: pointer;
+}
+
+.role-card-flip.flipped {
+  transform: rotateY(180deg);
+}
+
+.role-card-front,
+.role-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.role-card-front {
+  background: linear-gradient(135deg, #434343 0%, #000000 100%);
+}
+
+.card-back-design {
+  text-align: center;
+}
+
+.card-icon {
+  font-size: 4rem;
+  margin-bottom: 10px;
+}
+
+.card-back-design p {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.role-card-back {
+  transform: rotateY(180deg);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+}
+
+.role-card-back.good {
+  border: 3px solid #4caf50;
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(76, 175, 80, 0.1) 100%);
+}
+
+.role-card-back.evil {
+  border: 3px solid #f44336;
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.3) 0%, rgba(244, 67, 54, 0.1) 100%);
+}
+
+.role-name {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #ffd700;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.role-team {
+  font-size: 1rem;
+  margin-bottom: 15px;
+  opacity: 0.9;
+}
+
+.role-info-compact {
+  font-size: 0.75rem;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.role-info-compact small {
+  display: block;
+  margin: 3px 0;
+}
+
+/* ====================
+   Main Game Area
+   ==================== */
+
+.game-main {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  padding: 25px;
+  backdrop-filter: blur(5px);
+}
+
+/* Quest Results */
+.quest-results {
+  margin-bottom: 25px;
+}
+
+.quest-results h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+}
+
+.quests-row {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.quest-marker {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.quest-marker.success {
+  background: rgba(76, 175, 80, 0.3);
+  border-color: #4caf50;
+}
+
+.quest-marker.fail {
+  background: rgba(244, 67, 54, 0.3);
+  border-color: #f44336;
+}
+
+.quest-number {
+  font-size: 0.9rem;
+}
+
+.quest-result {
+  font-size: 1.5rem;
+}
+
+/* Leader Display */
+.leader-display {
+  text-align: center;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.leader-label {
+  opacity: 0.8;
+  margin-right: 10px;
+}
+
+.leader-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #ffd700;
+}
+
+/* ====================
+   Action Panels
+   ==================== */
+
+.action-panel {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.action-panel h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+/* Player Selection Grid */
+.player-selection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.player-select-btn {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.player-select-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.player-select-btn.selected {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+  font-weight: bold;
+}
+
+.player-select-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-nominate {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-nominate:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-nominate:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Nominated Team Display */
+.nominated-team {
+  margin-bottom: 20px;
+}
+
+.nominated-team p {
+  margin-bottom: 10px;
+}
+
+.team-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.team-member {
+  padding: 8px 15px;
+  background: rgba(102, 126, 234, 0.3);
+  border-radius: 20px;
+  border: 2px solid #667eea;
+}
+
+/* Vote Buttons */
+.vote-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.vote-buttons button {
+  flex: 1;
+  padding: 15px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-approve {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+}
+
+.btn-approve:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+}
+
+.btn-reject {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+}
+
+.btn-reject:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+}
+
+.btn-success:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+}
+
+.btn-fail {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+}
+
+.btn-fail:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+}
+
+.vote-buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vote-note {
+  margin-top: 15px;
+  font-size: 0.9rem;
+  opacity: 0.7;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Waiting Panel */
+.waiting-panel {
+  text-align: center;
+  padding: 40px 20px;
+  opacity: 0.8;
+}
+
+.waiting-panel p {
+  font-size: 1.1rem;
+  margin: 10px 0;
+}
+
+/* Game Over Panel */
+.game-over-panel {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.game-over-panel h2 {
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  color: #ffd700;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+}
+
+.btn-back-lobby {
+  padding: 15px 40px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-back-lobby:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* ====================
+   Players Panel
+   ==================== */
+
+.players-panel {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  padding: 20px;
+  backdrop-filter: blur(5px);
+}
+
+.players-panel h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.player-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.player-item.leader {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.1);
+}
+
+.player-name {
+  font-weight: 600;
+}
+
+.player-status {
+  font-size: 0.85rem;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.player-status.online {
+  background: rgba(76, 175, 80, 0.3);
+  color: #4caf50;
+}
+
+.player-status.offline {
+  background: rgba(158, 158, 158, 0.3);
+  color: #9e9e9e;
+}
+
+/* ====================
+   Responsive Design
+   ==================== */
+
+@media (max-width: 1200px) {
+  .game-content {
+    grid-template-columns: 1fr;
+  }
+
+  .role-card-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .players-panel {
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .game-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .header-left {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .current-user {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .player-selection-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vote-buttons {
+    flex-direction: column;
+  }
+
+  .countdown-number {
+    font-size: 6rem;
+  }
+
+  .role-name-large {
+    font-size: 2rem;
+  }
+
+  .role-team-large {
+    font-size: 1.3rem;
+  }
+}

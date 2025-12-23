@@ -1,0 +1,89 @@
+{
+    "gameId": "avalon",
+    "displayName": "The Resistance: Avalon",
+    "minPlayers": 6,
+    "maxPlayers": 10,
+    "questsToWin": 3,
+    "playerConfigs": {
+        "6": {
+            "totalPlayers": 6,
+            "goodCount": 4,
+            "evilCount": 2,
+            "roles": {
+                "good": ["merlin", "percival", "loyal_servant", "loyal_servant"],
+                "evil": ["assassin", "morgana"]
+            },
+            "quests": [
+                { "questNumber": 1, "teamSize": 2, "failsRequired": 1 },
+                { "questNumber": 2, "teamSize": 3, "failsRequired": 1 },
+                { "questNumber": 3, "teamSize": 4, "failsRequired": 1 },
+                { "questNumber": 4, "teamSize": 3, "failsRequired": 1 },
+                { "questNumber": 5, "teamSize": 4, "failsRequired": 1 }
+            ]
+        },
+        "7": {
+            "totalPlayers": 7,
+            "goodCount": 4,
+            "evilCount": 3,
+            "roles": {
+                "good": ["merlin", "percival", "loyal_servant", "loyal_servant"],
+                "evil": ["assassin", "morgana", "minion"]
+            },
+            "quests": [
+                { "questNumber": 1, "teamSize": 2, "failsRequired": 1 },
+                { "questNumber": 2, "teamSize": 3, "failsRequired": 1 },
+                { "questNumber": 3, "teamSize": 3, "failsRequired": 1 },
+                { "questNumber": 4, "teamSize": 4, "failsRequired": 2 },
+                { "questNumber": 5, "teamSize": 4, "failsRequired": 1 }
+            ]
+        },
+        "8": {
+            "totalPlayers": 8,
+            "goodCount": 5,
+            "evilCount": 3,
+            "roles": {
+                "good": ["merlin", "percival", "loyal_servant", "loyal_servant", "loyal_servant"],
+                "evil": ["assassin", "morgana", "minion"]
+            },
+            "quests": [
+                { "questNumber": 1, "teamSize": 3, "failsRequired": 1 },
+                { "questNumber": 2, "teamSize": 4, "failsRequired": 1 },
+                { "questNumber": 3, "teamSize": 4, "failsRequired": 1 },
+                { "questNumber": 4, "teamSize": 5, "failsRequired": 2 },
+                { "questNumber": 5, "teamSize": 5, "failsRequired": 1 }
+            ]
+        },
+        "9": {
+            "totalPlayers": 9,
+            "goodCount": 6,
+            "evilCount": 3,
+            "roles": {
+                "good": ["merlin", "percival", "loyal_servant", "loyal_servant", "loyal_servant", "loyal_servant"],
+                "evil": ["assassin", "morgana", "minion"]
+            },
+            "quests": [
+                { "questNumber": 1, "teamSize": 3, "failsRequired": 1 },
+                { "questNumber": 2, "teamSize": 4, "failsRequired": 1 },
+                { "questNumber": 3, "teamSize": 4, "failsRequired": 1 },
+                { "questNumber": 4, "teamSize": 5, "failsRequired": 2 },
+                { "questNumber": 5, "teamSize": 5, "failsRequired": 1 }
+            ]
+        },
+        "10": {
+            "totalPlayers": 10,
+            "goodCount": 6,
+            "evilCount": 4,
+            "roles": {
+                "good": ["merlin", "percival", "loyal_servant", "loyal_servant", "loyal_servant", "loyal_servant"],
+                "evil": ["assassin", "morgana", "minion", "minion"]
+            },
+            "quests": [
+                { "questNumber": 1, "teamSize": 3, "failsRequired": 1 },
+                { "questNumber": 2, "teamSize": 4, "failsRequired": 1 },
+                { "questNumber": 3, "teamSize": 4, "failsRequired": 1 },
+                { "questNumber": 4, "teamSize": 5, "failsRequired": 2 },
+                { "questNumber": 5, "teamSize": 5, "failsRequired": 1 }
+            ]
+        }
+    }
+}

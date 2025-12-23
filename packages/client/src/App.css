@@ -1,0 +1,95 @@
+/* Global App Styles */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --color-bg-primary: #0a0a0a;
+  --color-bg-secondary: #1a1a1a;
+  --color-text-primary: #d0d0d0;
+  --color-text-secondary: #999999;
+  --color-text-dim: #666666;
+  --color-accent-danger: #ff4444;
+  --color-accent-warning: #ffaa44;
+  --color-accent-anomaly: #ff00ff;
+  --color-border: rgba(255, 255, 255, 0.1);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  font-family: 'Courier New', 'Courier', monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+
+/* Selection Styles */
+::selection {
+  background: rgba(255, 68, 68, 0.3);
+  color: #fff;
+}
+
+::-moz-selection {
+  background: rgba(255, 68, 68, 0.3);
+  color: #fff;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Focus Styles */
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--color-accent-danger);
+  outline-offset: 2px;
+}
+
+/* Disable text selection on UI elements */
+button,
+.top-bar,
+.status-panel,
+.footer-actions {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+/* Allow text selection in narrative */
+.narrative-box__text,
+.inventory__item-desc,
+.event-log__summary {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+}

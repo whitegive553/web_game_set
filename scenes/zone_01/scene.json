@@ -1,0 +1,18 @@
+{
+  "sceneId": "zone_01",
+  "name": "未知禁区入口",
+  "theme": ["mountain", "abnormal", "isolation"],
+  "description": "这是进入异常禁区的第一个检查点区域。地形以低矮的山坡和干燥的碎石地为主，植被稀疏且呈现不自然的枯萎状态。空气中有轻微的金属味，温度比周边地区低 2-3 度。远处可见废弃的观测站轮廓，但距离和能见度使细节难以辨认。这个区域的异常现象相对温和，但已经开始出现现实稳定性下降的迹象：指南针偶尔失准，影子长度与太阳角度不完全匹配，某些石头的纹理在不同角度下呈现矛盾的视觉信息。",
+  "allowedEvents": ["exploration", "encounter", "anomaly"],
+  "possibleItems": ["item_001", "item_002"],
+  "dangerLevel": 2,
+  "background": {
+    "preferred": "background.jpg",
+    "fallbackColor": "#0b0f14"
+  },
+  "rules": {
+    "maxSteps": 15,
+    "evacuationAvailable": true,
+    "deathIsPermament": false
+  }
+}

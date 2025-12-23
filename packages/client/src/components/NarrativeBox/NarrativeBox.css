@@ -1,0 +1,141 @@
+/* NarrativeBox Styles */
+
+.narrative-box {
+  position: relative;
+  padding: 2rem;
+  background: rgba(10, 10, 10, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  backdrop-filter: blur(15px);
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Speaker Tag */
+.narrative-box__speaker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.narrative-box__speaker-icon {
+  width: 16px;
+  height: 16px;
+  color: #ff4444;
+}
+
+.narrative-box__speaker-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 2;
+}
+
+.narrative-box__speaker-name {
+  font-size: 0.75rem;
+  color: #ff4444;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 500;
+}
+
+/* Content */
+.narrative-box__content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.narrative-box__text {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #d0d0d0;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+}
+
+.narrative-box__empty {
+  font-size: 1rem;
+  color: #666;
+  font-style: italic;
+}
+
+.narrative-box__cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.2em;
+  background: #ff4444;
+  margin-left: 2px;
+  animation: cursor-blink 1s step-end infinite;
+}
+
+/* Typing Indicator */
+.narrative-box__typing-indicator {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.25rem;
+}
+
+.narrative-box__typing-indicator span {
+  width: 6px;
+  height: 6px;
+  background: #666;
+  border-radius: 50%;
+  animation: typing-dot 1.4s ease-in-out infinite;
+}
+
+.narrative-box__typing-indicator span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.narrative-box__typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.narrative-box__typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Animations */
+@keyframes cursor-blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+@keyframes typing-dot {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  30% {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .narrative-box {
+    padding: 1.5rem;
+    min-height: 150px;
+  }
+
+  .narrative-box__text {
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  .narrative-box__speaker {
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+  }
+}

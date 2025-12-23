@@ -1,0 +1,46 @@
+# 忽略 node_modules
+node_modules
+npm-debug.log
+
+# 忽略开发文件
+.git
+.gitignore
+*.md
+.vscode
+.idea
+
+# 忽略环境变量文件（通过 docker-compose 传入）
+.env
+.env.local
+.env.development
+.env.test
+packages/server/.env
+packages/client/.env
+
+# 忽略构建输出（会在容器内重新构建）
+dist
+build
+packages/*/dist
+packages/*/build
+
+# 忽略测试文件
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+coverage
+
+# 忽略日志文件
+*.log
+logs
+
+# 忽略临时文件
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# 忽略部署文档（不需要在容器内）
+DEPLOYMENT.md
+README.md

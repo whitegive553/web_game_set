@@ -1,0 +1,85 @@
+{
+  "userId": "79ada627ecc7ec4c7b5b6a8a5c74887a",
+  "activeSaveSlotId": "slot-1",
+  "vault": [],
+  "saves": {
+    "slot-1": {
+      "slotId": "slot-1",
+      "updatedAt": 1766061761741,
+      "currentRun": {
+        "runId": "492e86a50bffb7e02db5f731d0596037",
+        "startedAt": 1766061761428,
+        "state": {
+          "location": "ZONE_CHAMBER",
+          "turnCount": 6,
+          "visibleStats": {
+            "health": 40,
+            "stamina": 65,
+            "sanity": 85,
+            "supplies": 70
+          },
+          "hiddenStats": {
+            "sanity": 85,
+            "anomalyAffinity": 0,
+            "observationLevel": 0,
+            "realityStability": 100
+          },
+          "inventory": [],
+          "flags": {},
+          "eventHistory": [
+            "log_1766061758267",
+            "log_1766061758759",
+            "log_1766061759336",
+            "log_1766061759843",
+            "log_1766061760418"
+          ]
+        },
+        "log": [
+          {
+            "turn": 2,
+            "location": "ZONE_CORRIDOR",
+            "summary": "The corridor is narrow and dark. Vegetation has re...",
+            "timestamp": 1766061758267
+          },
+          {
+            "turn": 3,
+            "location": "ZONE_CORRIDOR",
+            "summary": "The corridor is narrow and dark. Vegetation has re...",
+            "timestamp": 1766061758759
+          },
+          {
+            "turn": 4,
+            "location": "ZONE_CHAMBER",
+            "summary": "You enter a large chamber. The ceiling is partiall...",
+            "timestamp": 1766061759336
+          },
+          {
+            "turn": 5,
+            "location": "ZONE_CHAMBER",
+            "summary": "You enter a large chamber. The ceiling is partiall...",
+            "timestamp": 1766061759843
+          },
+          {
+            "turn": 6,
+            "location": "ZONE_CHAMBER",
+            "summary": "You enter a large chamber. The ceiling is partiall...",
+            "timestamp": 1766061760418
+          }
+        ]
+      },
+      "unlocked": {
+        "locations": [],
+        "anomalies": [],
+        "items": []
+      },
+      "runHistorySummary": {
+        "totalRuns": 0,
+        "totalDeaths": 0,
+        "successfulEvacuations": 0,
+        "totalTurns": 0
+      }
+    }
+  },
+  "createdAt": 1766053241146,
+  "updatedAt": 1766061761741
+}

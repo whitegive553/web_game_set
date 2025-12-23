@@ -1,0 +1,176 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LLM Input Schema",
+  "description": "Schema for structured input to LLM for narrative generation",
+  "type": "object",
+  "required": ["promptType", "context", "constraints"],
+  "properties": {
+    "promptType": {
+      "type": "string",
+      "enum": ["scene_and_choice_generation"],
+      "description": "Type of prompt being sent to LLM"
+    },
+    "context": {
+      "type": "object",
+      "required": ["scene", "player", "history", "meta"],
+      "properties": {
+        "scene": {
+          "type": "object",
+          "required": ["sceneId", "name", "theme", "dangerLevel"],
+          "properties": {
+            "sceneId": {
+              "type": "string",
+              "description": "Unique identifier for the scene"
+            },
+            "name": {
+              "type": "string",
+              "description": "Human-readable scene name"
+            },
+            "theme": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Thematic tags for the scene"
+            },
+            "dangerLevel": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "description": "Danger rating of the scene"
+            }
+          }
+        },
+        "player": {
+          "type": "object",
+          "required": ["visibleState", "inventorySummary", "vaultSummary"],
+          "properties": {
+            "visibleState": {
+              "type": "object",
+              "required": ["health", "stamina", "hunger", "water"],
+              "properties": {
+                "health": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "stamina": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "hunger": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "water": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                }
+              }
+            },
+            "inventorySummary": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "List of item names in inventory"
+            },
+            "vaultSummary": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "List of persistent items in vault"
+            }
+          }
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["step", "eventId", "choiceId", "choiceText", "consequenceSummary"],
+            "properties": {
+              "step": {
+                "type": "number",
+                "description": "Step number in game"
+              },
+              "eventId": {
+                "type": "string",
+                "description": "ID of the event that occurred"
+              },
+              "choiceId": {
+                "type": "string",
+                "description": "ID of choice player made"
+              },
+              "choiceText": {
+                "type": "string",
+                "description": "Text of choice player made"
+              },
+              "consequenceSummary": {
+                "type": "string",
+                "description": "Summary of what happened as result"
+              }
+            }
+          },
+          "description": "Recent history of player actions (max 8 entries)"
+        },
+        "meta": {
+          "type": "object",
+          "required": ["step", "failureCount", "runId"],
+          "properties": {
+            "step": {
+              "type": "number",
+              "description": "Current step number"
+            },
+            "failureCount": {
+              "type": "number",
+              "description": "Number of times player has failed/died"
+            },
+            "runId": {
+              "type": "string",
+              "description": "Unique identifier for this game run"
+            },
+            "timezone": {
+              "type": "string",
+              "description": "Optional timezone information"
+            }
+          }
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "required": ["minChoices", "maxChoices", "tone", "language", "noDirectOutcome"],
+      "properties": {
+        "minChoices": {
+          "type": "number",
+          "minimum": 2,
+          "maximum": 4,
+          "description": "Minimum number of choices to generate"
+        },
+        "maxChoices": {
+          "type": "number",
+          "minimum": 2,
+          "maximum": 4,
+          "description": "Maximum number of choices to generate"
+        },
+        "tone": {
+          "type": "string",
+          "enum": ["cold_and_uncertain", "tense", "calm", "ominous"],
+          "description": "Narrative tone to use"
+        },
+        "language": {
+          "type": "string",
+          "description": "Language code (e.g., zh-CN, en-US)"
+        },
+        "noDirectOutcome": {
+          "type": "boolean",
+          "description": "If true, must not include specific outcomes in narrative"
+        }
+      }
+    }
+  }
+}
