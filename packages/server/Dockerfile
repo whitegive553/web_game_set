@@ -12,7 +12,7 @@ COPY packages/shared/package.json ./packages/shared/
 COPY packages/game-engine/package.json ./packages/game-engine/
 
 # 安装所有依赖（包括 devDependencies 用于构建）
-RUN npm ci
+RUN npm install
 
 # 构建阶段
 FROM base AS build
@@ -47,7 +47,7 @@ COPY packages/server/package.json ./packages/server/
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/game-engine/package.json ./packages/game-engine/
 
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 # 从构建阶段复制编译后的文件
 COPY --from=build /app/packages/server/dist ./packages/server/dist

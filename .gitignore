@@ -1,6 +1,6 @@
 # Dependencies
 node_modules/
-package-lock.json
+# package-lock.json  # 注释掉，生产环境需要此文件确保依赖版本一致
 yarn.lock
 
 # Build outputs

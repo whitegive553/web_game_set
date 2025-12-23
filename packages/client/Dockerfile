@@ -11,7 +11,7 @@ COPY packages/client/package.json ./packages/client/
 COPY packages/shared/package.json ./packages/shared/
 
 # 安装依赖
-RUN npm ci
+RUN npm install
 
 # 构建阶段
 FROM base AS build
