@@ -24,7 +24,6 @@ COPY --from=dependencies /app/package.json ./
 # 复制源代码
 COPY packages/shared ./packages/shared
 COPY packages/client ./packages/client
-COPY tsconfig.json ./
 
 # 构建 shared 包
 RUN npm run build --workspace=packages/shared

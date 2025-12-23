@@ -27,7 +27,6 @@ COPY packages/shared ./packages/shared
 COPY packages/game-engine ./packages/game-engine
 COPY packages/server ./packages/server
 COPY games ./games
-COPY tsconfig.json ./
 
 # 构建所有包
 RUN npm run build --workspace=packages/shared
