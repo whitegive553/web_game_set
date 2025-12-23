@@ -5,6 +5,9 @@ FROM node:18-alpine AS base
 FROM base AS dependencies
 WORKDIR /app
 
+# 安装编译工具（bcrypt 等原生模块需要）
+RUN apk add --no-cache python3 make g++
+
 # 复制 package.json 文件
 COPY package.json package-lock.json* ./
 COPY packages/server/package.json ./packages/server/
@@ -41,13 +44,20 @@ RUN npx tsc avalon-game.ts --skipLibCheck --module commonjs --target es2020 --ou
 FROM base AS production
 WORKDIR /app
 
-# 只安装生产依赖
+# 安装编译工具（bcrypt 等原生模块需要）
+RUN apk add --no-cache python3 make g++
+
+# 复制 package.json 文件
 COPY package.json package-lock.json* ./
 COPY packages/server/package.json ./packages/server/
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/game-engine/package.json ./packages/game-engine/
 
+# 安装生产依赖
 RUN npm install --omit=dev
+
+# 清理编译工具以减小镜像体积
+RUN apk del python3 make g++
 
 # 从构建阶段复制编译后的文件
 COPY --from=build /app/packages/server/dist ./packages/server/dist
