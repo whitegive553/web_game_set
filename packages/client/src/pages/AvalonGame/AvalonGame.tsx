@@ -38,6 +38,7 @@ interface PublicState {
     fail: number;
   };
   winner?: string;
+  winReason?: string;
 }
 
 interface PrivateState {
@@ -46,6 +47,7 @@ interface PrivateState {
   team: string;
   evilPlayers?: string[];
   merlinCandidates?: string[];
+  hasVotedQuest?: boolean;
 }
 
 export const AvalonGame: React.FC = () => {
