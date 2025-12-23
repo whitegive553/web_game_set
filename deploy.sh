@@ -51,8 +51,42 @@ fi
 
 if ! command -v docker-compose &> /dev/null; then
     print_warn "docker-compose 未安装，正在安装..."
-    apt update
-    apt install -y docker-compose
+
+    # 检测包管理器
+    if command -v yum &> /dev/null; then
+        # RHEL/CentOS/Alibaba Cloud Linux
+        print_info "检测到 yum 包管理器（RHEL/CentOS/Alibaba Cloud Linux）"
+
+        # 尝试从 yum 安装
+        if yum install -y docker-compose 2>/dev/null; then
+            print_info "docker-compose 安装成功"
+        else
+            # 如果 yum 仓库没有，从 GitHub 下载
+            print_warn "yum 仓库中未找到 docker-compose，从 GitHub 下载..."
+
+            # 下载最新版本的 docker-compose
+            COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+            if [ -z "$COMPOSE_VERSION" ]; then
+                COMPOSE_VERSION="v2.24.0"  # 备用版本
+            fi
+
+            curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            chmod +x /usr/local/bin/docker-compose
+
+            # 创建软链接
+            ln -sf /usr/local/bin/docker-compose /usr/bin/docker-compose
+
+            print_info "docker-compose ${COMPOSE_VERSION} 安装成功"
+        fi
+    elif command -v apt &> /dev/null; then
+        # Debian/Ubuntu
+        print_info "检测到 apt 包管理器（Debian/Ubuntu）"
+        apt update
+        apt install -y docker-compose
+    else
+        print_error "未检测到支持的包管理器（yum 或 apt）"
+        exit 1
+    fi
 fi
 
 print_info "Docker 版本: $(docker --version)"

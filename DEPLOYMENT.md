@@ -58,6 +58,23 @@ ssh -i /path/to/your-key.pem root@你的服务器IP
 
 ### 2. 更新系统并安装必要工具
 
+**Alibaba Cloud Linux / CentOS / RHEL (yum):**
+```bash
+# 更新系统包
+sudo yum update -y
+
+# 安装 Git（如果没有）
+sudo yum install -y git
+
+# 验证 Docker 安装
+docker --version
+docker-compose --version
+
+# 如果没有 docker-compose，deploy.sh 会自动安装
+# 手动安装命令：sudo yum install -y docker-compose
+```
+
+**Ubuntu / Debian (apt):**
 ```bash
 # 更新系统包
 sudo apt update && sudo apt upgrade -y
@@ -75,6 +92,25 @@ sudo apt install -y docker-compose
 
 ### 3. 配置防火墙
 
+**Alibaba Cloud Linux / CentOS / RHEL (firewalld):**
+```bash
+# 启动防火墙服务
+sudo systemctl start firewalld
+sudo systemctl enable firewalld
+
+# 开放必要端口
+sudo firewall-cmd --permanent --add-port=22/tcp    # SSH
+sudo firewall-cmd --permanent --add-port=80/tcp    # HTTP
+sudo firewall-cmd --permanent --add-port=443/tcp   # HTTPS（可选）
+
+# 重新加载防火墙规则
+sudo firewall-cmd --reload
+
+# 查看开放的端口
+sudo firewall-cmd --list-ports
+```
+
+**Ubuntu / Debian (ufw):**
 ```bash
 # 开放必要端口
 sudo ufw allow 22      # SSH
@@ -350,11 +386,15 @@ free -h
 ### 问题 1：无法访问网站
 
 ```bash
-# 检查防火墙
-sudo ufw status
+# 检查防火墙（根据系统选择命令）
+sudo firewall-cmd --list-ports  # RHEL/CentOS/Alibaba Cloud Linux
+# 或
+sudo ufw status                  # Ubuntu/Debian
 
 # 检查端口监听
 sudo netstat -tlnp | grep -E '80|3001'
+# 或（如果没有 netstat）
+sudo ss -tlnp | grep -E '80|3001'
 
 # 检查容器状态
 docker-compose ps
@@ -417,6 +457,11 @@ sudo nano /etc/ssh/sshd_config
 sudo systemctl restart sshd
 
 # 记得在防火墙开放新端口
+# RHEL/CentOS/Alibaba Cloud Linux:
+sudo firewall-cmd --permanent --add-port=2222/tcp
+sudo firewall-cmd --reload
+
+# Ubuntu/Debian:
 sudo ufw allow 2222
 ```
 
@@ -436,6 +481,22 @@ sudo systemctl restart sshd
 
 ### 3. 配置 HTTPS（可选但推荐）
 
+**Alibaba Cloud Linux / CentOS / RHEL (yum):**
+```bash
+# 安装 EPEL 仓库（如果没有）
+sudo yum install -y epel-release
+
+# 安装 Certbot
+sudo yum install -y certbot python3-certbot-nginx
+
+# 申请免费 SSL 证书（需要域名）
+sudo certbot --nginx -d yourdomain.com
+
+# 自动续期
+sudo certbot renew --dry-run
+```
+
+**Ubuntu / Debian (apt):**
 ```bash
 # 安装 Certbot
 sudo apt install -y certbot python3-certbot-nginx
