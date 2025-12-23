@@ -49,40 +49,49 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-if ! command -v docker-compose &> /dev/null; then
-    print_warn "docker-compose 未安装，正在安装..."
+# 检测 Docker Compose 版本（V2 优先）
+DOCKER_COMPOSE_CMD=""
+
+# 先检查 docker compose (V2, 推荐)
+if docker compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+    print_info "检测到 Docker Compose V2"
+# 再检查 docker-compose (V1, 旧版)
+elif command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+    print_info "检测到 Docker Compose V1"
+else
+    print_warn "Docker Compose 未安装，正在安装最新版本..."
 
     # 检测包管理器
     if command -v yum &> /dev/null; then
         # RHEL/CentOS/Alibaba Cloud Linux
         print_info "检测到 yum 包管理器（RHEL/CentOS/Alibaba Cloud Linux）"
 
-        # 尝试从 yum 安装
-        if yum install -y docker-compose 2>/dev/null; then
-            print_info "docker-compose 安装成功"
-        else
-            # 如果 yum 仓库没有，从 GitHub 下载
-            print_warn "yum 仓库中未找到 docker-compose，从 GitHub 下载..."
+        # 从 GitHub 下载最新版本（推荐）
+        print_info "从 GitHub 下载最新版 Docker Compose..."
 
-            # 下载最新版本的 docker-compose
-            COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
-            if [ -z "$COMPOSE_VERSION" ]; then
-                COMPOSE_VERSION="v2.24.0"  # 备用版本
-            fi
-
-            curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-            chmod +x /usr/local/bin/docker-compose
-
-            # 创建软链接
-            ln -sf /usr/local/bin/docker-compose /usr/bin/docker-compose
-
-            print_info "docker-compose ${COMPOSE_VERSION} 安装成功"
+        # 下载最新版本的 docker-compose
+        COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep -Po '"tag_name": "v\K[^"]*')
+        if [ -z "$COMPOSE_VERSION" ]; then
+            COMPOSE_VERSION="2.24.0"  # 备用版本
         fi
+
+        print_info "下载 Docker Compose v${COMPOSE_VERSION}..."
+        curl -L "https://github.com/docker/compose/releases/download/v${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        chmod +x /usr/local/bin/docker-compose
+
+        # 创建软链接
+        ln -sf /usr/local/bin/docker-compose /usr/bin/docker-compose
+
+        DOCKER_COMPOSE_CMD="docker-compose"
+        print_info "docker-compose v${COMPOSE_VERSION} 安装成功"
     elif command -v apt &> /dev/null; then
         # Debian/Ubuntu
         print_info "检测到 apt 包管理器（Debian/Ubuntu）"
         apt update
         apt install -y docker-compose
+        DOCKER_COMPOSE_CMD="docker-compose"
     else
         print_error "未检测到支持的包管理器（yum 或 apt）"
         exit 1
@@ -90,7 +99,12 @@ if ! command -v docker-compose &> /dev/null; then
 fi
 
 print_info "Docker 版本: $(docker --version)"
-print_info "Docker Compose 版本: $(docker-compose --version)"
+if [ "$DOCKER_COMPOSE_CMD" = "docker compose" ]; then
+    print_info "Docker Compose 版本: $(docker compose version)"
+else
+    print_info "Docker Compose 版本: $(docker-compose --version)"
+fi
+print_info "使用命令: ${DOCKER_COMPOSE_CMD}"
 
 # 2. 检查 .env 文件
 print_step "2/7 检查环境变量配置"
@@ -125,9 +139,9 @@ print_info "环境变量配置检查完成"
 # 3. 停止旧服务
 print_step "3/7 停止旧服务（如果存在）"
 
-if docker-compose ps | grep -q "Up"; then
+if $DOCKER_COMPOSE_CMD ps 2>/dev/null | grep -q "Up"; then
     print_info "检测到运行中的服务，正在停止..."
-    docker-compose down
+    $DOCKER_COMPOSE_CMD down
     print_info "旧服务已停止"
 else
     print_info "没有运行中的服务"
@@ -138,7 +152,7 @@ print_step "4/7 构建 Docker 镜像"
 
 print_warn "首次构建可能需要 10-15 分钟，请耐心等待..."
 
-if docker-compose build; then
+if $DOCKER_COMPOSE_CMD build; then
     print_info "镜像构建成功"
 else
     print_error "镜像构建失败，请检查日志"
@@ -148,7 +162,7 @@ fi
 # 5. 启动服务
 print_step "5/7 启动服务"
 
-if docker-compose up -d; then
+if $DOCKER_COMPOSE_CMD up -d; then
     print_info "服务启动成功"
 else
     print_error "服务启动失败"
@@ -177,7 +191,7 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
 
     if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
         print_error "后端服务启动超时"
-        print_info "查看日志: docker-compose logs server"
+        print_info "查看日志: $DOCKER_COMPOSE_CMD logs server"
         exit 1
     fi
 done
@@ -200,7 +214,7 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
 
     if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
         print_error "前端服务启动超时"
-        print_info "查看日志: docker-compose logs client"
+        print_info "查看日志: $DOCKER_COMPOSE_CMD logs client"
         exit 1
     fi
 done
@@ -212,7 +226,7 @@ print_step "7/7 验证部署"
 
 # 检查容器状态
 print_info "容器状态："
-docker-compose ps
+$DOCKER_COMPOSE_CMD ps
 
 # 获取服务器公网 IP
 SERVER_IP=$(curl -s ifconfig.me)
@@ -228,10 +242,10 @@ echo -e "  后端 API: ${YELLOW}http://${SERVER_IP}:3001${NC}"
 echo ""
 
 echo -e "${GREEN}常用命令：${NC}"
-echo -e "  查看日志:   ${YELLOW}docker-compose logs -f${NC}"
-echo -e "  查看状态:   ${YELLOW}docker-compose ps${NC}"
-echo -e "  停止服务:   ${YELLOW}docker-compose down${NC}"
-echo -e "  重启服务:   ${YELLOW}docker-compose restart${NC}"
+echo -e "  查看日志:   ${YELLOW}${DOCKER_COMPOSE_CMD} logs -f${NC}"
+echo -e "  查看状态:   ${YELLOW}${DOCKER_COMPOSE_CMD} ps${NC}"
+echo -e "  停止服务:   ${YELLOW}${DOCKER_COMPOSE_CMD} down${NC}"
+echo -e "  重启服务:   ${YELLOW}${DOCKER_COMPOSE_CMD} restart${NC}"
 echo -e "  查看资源:   ${YELLOW}docker stats${NC}"
 echo ""
 
