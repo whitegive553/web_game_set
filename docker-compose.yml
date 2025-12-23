@@ -35,9 +35,9 @@ services:
       args:
         # 使用服务名作为后端地址（Docker 内部通信）
         # 注意：外部访问时，nginx 会将请求代理到 server 服务
-        VITE_API_URL=http://localhost:3001
-        VITE_WS_URL=ws://localhost:3001/ws
-        VITE_API_BASE=http://localhost:3001/api/game
+        VITE_API_URL: http://localhost:3001
+        VITE_WS_URL: ws://localhost:3001/ws
+        VITE_API_BASE: http://localhost:3001/api/game
     container_name: avalon-client
     restart: unless-stopped
     ports:
