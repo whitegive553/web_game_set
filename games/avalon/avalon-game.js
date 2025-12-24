@@ -20,7 +20,15 @@ class AvalonGame {
             throw new Error(`Invalid player count: ${playerCount}`);
         }
         this.config = config_json_1.default.playerConfigs[configKey];
-        this.state = this.initializeState();
+        // Try to restore state from match if it exists
+        if (match.state && match.state.roleAssignments) {
+            console.log('[AvalonGame] Restoring game state from match');
+            this.state = match.state;
+        }
+        else {
+            console.log('[AvalonGame] Initializing new game state');
+            this.state = this.initializeState();
+        }
     }
     // ============================================================================
     // Initialization
@@ -39,6 +47,12 @@ class AvalonGame {
             questVotes: {},
             roleAssignments: {},
         };
+    }
+    /**
+     * Sync current game state to match object for persistence
+     */
+    syncStateToMatch() {
+        this.match.state = this.state;
     }
     // ============================================================================
     // Game Flow
@@ -61,6 +75,8 @@ class AvalonGame {
             visibleTo: 'all',
         };
         this.events.push(event);
+        // Sync state to match for persistence
+        this.syncStateToMatch();
         // Automatically move to nomination after players have seen their roles
         // Changed from 3 seconds to 8 seconds to allow for 5-second countdown + role reveal
         setTimeout(() => this.startNomination(), 8000);
@@ -94,6 +110,7 @@ class AvalonGame {
             visibleTo: 'all',
         };
         this.events.push(event);
+        this.syncStateToMatch();
         return [event];
     }
     // ============================================================================
@@ -133,6 +150,7 @@ class AvalonGame {
             visibleTo: 'all',
         };
         this.events.push(event);
+        this.syncStateToMatch();
         return [event];
     }
     handleVoteTeam(userId, approve) {
@@ -185,10 +203,12 @@ class AvalonGame {
             else {
                 // Team rejected, next leader
                 this.advanceLeader();
+                this.syncStateToMatch();
                 return events.concat(this.startNomination());
             }
         }
         this.events.push(...events);
+        this.syncStateToMatch();
         return events;
     }
     handleVoteQuest(userId, success) {
@@ -250,19 +270,23 @@ class AvalonGame {
             // Check win conditions
             if (this.state.goodWins >= 3) {
                 // Good needs to survive assassination
+                this.syncStateToMatch();
                 return events.concat(this.startAssassination());
             }
             else if (this.state.evilWins >= 3) {
                 // Evil wins
+                this.syncStateToMatch();
                 return events.concat(this.endGame(avalon_1.AvalonTeam.EVIL, 'Three quests failed'));
             }
             else {
                 // Continue to next round
                 this.advanceLeader();
+                this.syncStateToMatch();
                 setTimeout(() => this.startNomination(), 2000);
             }
         }
         this.events.push(...events);
+        this.syncStateToMatch();
         return events;
     }
     handleAssassinate(userId, targetUserId) {
@@ -308,6 +332,7 @@ class AvalonGame {
             visibleTo: 'all',
         };
         this.events.push(event);
+        this.syncStateToMatch();
         return [event];
     }
     endGame(winner, reason) {
@@ -328,6 +353,8 @@ class AvalonGame {
         };
         this.events.push(event);
         this.match.endedAt = Date.now();
+        // Sync final state to match
+        this.syncStateToMatch();
         return [event];
     }
     // ============================================================================
@@ -372,6 +399,10 @@ class AvalonGame {
             privateState.merlinCandidates = Object.entries(this.state.roleAssignments)
                 .filter(([_, r]) => r === avalon_1.AvalonRole.MERLIN || r === avalon_1.AvalonRole.MORGANA)
                 .map(([uid, _]) => uid);
+        }
+        // Check if player has voted in current quest
+        if (this.state.phase === avalon_1.AvalonPhase.QUEST_VOTE) {
+            privateState.hasVotedQuest = this.state.questVotes[userId] !== undefined;
         }
         return privateState;
     }

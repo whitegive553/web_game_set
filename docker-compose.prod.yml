@@ -1,0 +1,49 @@
+services:
+  # 后端服务
+  server:
+    image: your-dockerhub-username/avalon-server:latest  # 替换为你的 Docker Hub 用户名
+    container_name: avalon-server
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - JWT_SECRET=${JWT_SECRET:-change-this-secret-in-production}
+      - SESSION_TIMEOUT=1800000
+    volumes:
+      # 如果未来需要持久化数据，可以挂载卷
+      - ./data:/app/data
+    networks:
+      - avalon-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # 前端服务 (nginx)
+  client:
+    image: your-dockerhub-username/avalon-client:latest  # 替换为你的 Docker Hub 用户名
+    container_name: avalon-client
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    networks:
+      - avalon-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  avalon-network:
+    driver: bridge
+
+volumes:
+  data:
+    driver: local
