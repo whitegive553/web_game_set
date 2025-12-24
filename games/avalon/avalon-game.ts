@@ -13,15 +13,13 @@ import {
   QuestResult,
   PlayerCountConfig,
   QuestConfig,
-} from '../../packages/shared/src/types/avalon';
-import {
   GameMatch,
   PluginGamePlayer,
   PluginGameEvent,
   PublicStateView,
   PrivateStateView,
   ValidationResult,
-} from '../../packages/shared/src/types/game-plugin';
+} from '@survival-game/shared';
 import gameConfig from './config.json';
 
 export class AvalonGame {

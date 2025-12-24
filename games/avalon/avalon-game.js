@@ -8,7 +8,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AvalonGame = void 0;
-const avalon_1 = require("../../packages/shared/src/types/avalon");
+const shared_1 = require("@survival-game/shared");
 const config_json_1 = __importDefault(require("./config.json"));
 class AvalonGame {
     constructor(match) {
@@ -35,7 +35,7 @@ class AvalonGame {
     // ============================================================================
     initializeState() {
         return {
-            phase: avalon_1.AvalonPhase.LOBBY,
+            phase: shared_1.AvalonPhase.LOBBY,
             round: 0,
             leader: this.match.players[0].userId,
             leaderIndex: 0,
@@ -58,20 +58,20 @@ class AvalonGame {
     // Game Flow
     // ============================================================================
     startGame() {
-        if (this.state.phase !== avalon_1.AvalonPhase.LOBBY) {
+        if (this.state.phase !== shared_1.AvalonPhase.LOBBY) {
             throw new Error('Game already started');
         }
         // Assign roles
         this.assignRoles();
         // Move to role reveal phase
-        this.state.phase = avalon_1.AvalonPhase.ROLE_REVEAL;
+        this.state.phase = shared_1.AvalonPhase.ROLE_REVEAL;
         const event = {
             eventId: `event_${Date.now()}`,
             matchId: this.match.matchId,
             gameId: 'avalon',
             timestamp: Date.now(),
             type: 'GAME_STARTED',
-            payload: { phase: avalon_1.AvalonPhase.ROLE_REVEAL },
+            payload: { phase: shared_1.AvalonPhase.ROLE_REVEAL },
             visibleTo: 'all',
         };
         this.events.push(event);
@@ -93,7 +93,7 @@ class AvalonGame {
         });
     }
     startNomination() {
-        this.state.phase = avalon_1.AvalonPhase.NOMINATION;
+        this.state.phase = shared_1.AvalonPhase.NOMINATION;
         this.state.round++;
         this.state.nominatedTeam = [];
         const event = {
@@ -118,7 +118,7 @@ class AvalonGame {
     // ============================================================================
     handleNominateTeam(userId, teamUserIds) {
         // Validate
-        if (this.state.phase !== avalon_1.AvalonPhase.NOMINATION) {
+        if (this.state.phase !== shared_1.AvalonPhase.NOMINATION) {
             throw new Error('Not in nomination phase');
         }
         if (userId !== this.state.leader) {
@@ -135,7 +135,7 @@ class AvalonGame {
         }
         // Update state
         this.state.nominatedTeam = teamUserIds;
-        this.state.phase = avalon_1.AvalonPhase.TEAM_VOTE;
+        this.state.phase = shared_1.AvalonPhase.TEAM_VOTE;
         this.state.teamVotes = {};
         const event = {
             eventId: `event_${Date.now()}`,
@@ -154,7 +154,7 @@ class AvalonGame {
         return [event];
     }
     handleVoteTeam(userId, approve) {
-        if (this.state.phase !== avalon_1.AvalonPhase.TEAM_VOTE) {
+        if (this.state.phase !== shared_1.AvalonPhase.TEAM_VOTE) {
             throw new Error('Not in team vote phase');
         }
         if (this.state.teamVotes[userId] !== undefined) {
@@ -188,7 +188,7 @@ class AvalonGame {
             });
             if (majority) {
                 // Team approved, move to quest
-                this.state.phase = avalon_1.AvalonPhase.QUEST_VOTE;
+                this.state.phase = shared_1.AvalonPhase.QUEST_VOTE;
                 this.state.questVotes = {};
                 events.push({
                     eventId: `event_${Date.now() + 2}`,
@@ -212,7 +212,7 @@ class AvalonGame {
         return events;
     }
     handleVoteQuest(userId, success) {
-        if (this.state.phase !== avalon_1.AvalonPhase.QUEST_VOTE) {
+        if (this.state.phase !== shared_1.AvalonPhase.QUEST_VOTE) {
             throw new Error('Not in quest vote phase');
         }
         if (!this.state.nominatedTeam.includes(userId)) {
@@ -224,7 +224,7 @@ class AvalonGame {
         // Good players can only vote success
         const role = this.state.roleAssignments[userId];
         const team = this.getRoleTeam(role);
-        if (team === avalon_1.AvalonTeam.GOOD && !success) {
+        if (team === shared_1.AvalonTeam.GOOD && !success) {
             throw new Error('Good players must vote success');
         }
         this.state.questVotes[userId] = success;
@@ -257,7 +257,7 @@ class AvalonGame {
             else {
                 this.state.evilWins++;
             }
-            this.state.phase = avalon_1.AvalonPhase.QUEST_RESULT;
+            this.state.phase = shared_1.AvalonPhase.QUEST_RESULT;
             events.push({
                 eventId: `event_${Date.now() + 1}`,
                 matchId: this.match.matchId,
@@ -276,7 +276,7 @@ class AvalonGame {
             else if (this.state.evilWins >= 3) {
                 // Evil wins
                 this.syncStateToMatch();
-                return events.concat(this.endGame(avalon_1.AvalonTeam.EVIL, 'Three quests failed'));
+                return events.concat(this.endGame(shared_1.AvalonTeam.EVIL, 'Three quests failed'));
             }
             else {
                 // Continue to next round
@@ -290,15 +290,15 @@ class AvalonGame {
         return events;
     }
     handleAssassinate(userId, targetUserId) {
-        if (this.state.phase !== avalon_1.AvalonPhase.ASSASSINATION) {
+        if (this.state.phase !== shared_1.AvalonPhase.ASSASSINATION) {
             throw new Error('Not in assassination phase');
         }
         const role = this.state.roleAssignments[userId];
-        if (role !== avalon_1.AvalonRole.ASSASSIN) {
+        if (role !== shared_1.AvalonRole.ASSASSIN) {
             throw new Error('Only assassin can assassinate');
         }
         const targetRole = this.state.roleAssignments[targetUserId];
-        const hitMerlin = targetRole === avalon_1.AvalonRole.MERLIN;
+        const hitMerlin = targetRole === shared_1.AvalonRole.MERLIN;
         this.state.assassinTarget = targetUserId;
         const events = [{
                 eventId: `event_${Date.now()}`,
@@ -314,14 +314,14 @@ class AvalonGame {
                 visibleTo: 'all',
             }];
         if (hitMerlin) {
-            return events.concat(this.endGame(avalon_1.AvalonTeam.EVIL, 'Merlin assassinated'));
+            return events.concat(this.endGame(shared_1.AvalonTeam.EVIL, 'Merlin assassinated'));
         }
         else {
-            return events.concat(this.endGame(avalon_1.AvalonTeam.GOOD, 'Merlin survived'));
+            return events.concat(this.endGame(shared_1.AvalonTeam.GOOD, 'Merlin survived'));
         }
     }
     startAssassination() {
-        this.state.phase = avalon_1.AvalonPhase.ASSASSINATION;
+        this.state.phase = shared_1.AvalonPhase.ASSASSINATION;
         const event = {
             eventId: `event_${Date.now()}`,
             matchId: this.match.matchId,
@@ -336,7 +336,7 @@ class AvalonGame {
         return [event];
     }
     endGame(winner, reason) {
-        this.state.phase = avalon_1.AvalonPhase.GAME_OVER;
+        this.state.phase = shared_1.AvalonPhase.GAME_OVER;
         this.state.winner = winner;
         const event = {
             eventId: `event_${Date.now()}`,
@@ -361,7 +361,7 @@ class AvalonGame {
     // State Views
     // ============================================================================
     getPublicState() {
-        const questVoteCount = this.state.phase === avalon_1.AvalonPhase.QUEST_VOTE || this.state.phase === avalon_1.AvalonPhase.QUEST_RESULT
+        const questVoteCount = this.state.phase === shared_1.AvalonPhase.QUEST_VOTE || this.state.phase === shared_1.AvalonPhase.QUEST_RESULT
             ? {
                 success: Object.values(this.state.questVotes).filter(v => v).length,
                 fail: Object.values(this.state.questVotes).filter(v => !v).length,
@@ -389,19 +389,19 @@ class AvalonGame {
             team,
         };
         // Merlin sees all evil players
-        if (role === avalon_1.AvalonRole.MERLIN) {
+        if (role === shared_1.AvalonRole.MERLIN) {
             privateState.evilPlayers = Object.entries(this.state.roleAssignments)
-                .filter(([_, r]) => this.getRoleTeam(r) === avalon_1.AvalonTeam.EVIL)
+                .filter(([_, r]) => this.getRoleTeam(r) === shared_1.AvalonTeam.EVIL)
                 .map(([uid, _]) => uid);
         }
         // Percival sees Merlin and Morgana (cannot distinguish)
-        if (role === avalon_1.AvalonRole.PERCIVAL) {
+        if (role === shared_1.AvalonRole.PERCIVAL) {
             privateState.merlinCandidates = Object.entries(this.state.roleAssignments)
-                .filter(([_, r]) => r === avalon_1.AvalonRole.MERLIN || r === avalon_1.AvalonRole.MORGANA)
+                .filter(([_, r]) => r === shared_1.AvalonRole.MERLIN || r === shared_1.AvalonRole.MORGANA)
                 .map(([uid, _]) => uid);
         }
         // Check if player has voted in current quest
-        if (this.state.phase === avalon_1.AvalonPhase.QUEST_VOTE) {
+        if (this.state.phase === shared_1.AvalonPhase.QUEST_VOTE) {
             privateState.hasVotedQuest = this.state.questVotes[userId] !== undefined;
         }
         return privateState;
@@ -420,10 +420,10 @@ class AvalonGame {
         this.state.leader = this.match.players[this.state.leaderIndex].userId;
     }
     getRoleTeam(role) {
-        if (role === avalon_1.AvalonRole.ASSASSIN || role === avalon_1.AvalonRole.MORGANA || role === avalon_1.AvalonRole.MINION) {
-            return avalon_1.AvalonTeam.EVIL;
+        if (role === shared_1.AvalonRole.ASSASSIN || role === shared_1.AvalonRole.MORGANA || role === shared_1.AvalonRole.MINION) {
+            return shared_1.AvalonTeam.EVIL;
         }
-        return avalon_1.AvalonTeam.GOOD;
+        return shared_1.AvalonTeam.GOOD;
     }
     shuffleArray(array) {
         const shuffled = [...array];
