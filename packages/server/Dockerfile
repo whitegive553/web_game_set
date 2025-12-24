@@ -8,13 +8,22 @@ WORKDIR /app
 # 安装编译工具（bcrypt 等原生模块需要）
 RUN apk add --no-cache python3 make g++
 
-# 复制整个项目（更可靠）
+# 配置 npm 使用淘宝镜像加速（国内服务器）
+RUN npm config set registry https://registry.npmmirror.com
+
+# 复制 package.json 文件（优化缓存）
 COPY package.json package-lock.json* ./
-COPY packages ./packages
-COPY games ./games
+COPY packages/server/package.json ./packages/server/package.json
+COPY packages/shared/package.json ./packages/shared/package.json
+COPY packages/game-engine/package.json ./packages/game-engine/package.json
 
 # 安装所有依赖（包括 devDependencies）
-RUN npm install
+# 使用 npm ci 更快且更可靠
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+# 复制源代码（放在依赖安装之后，优化缓存）
+COPY packages ./packages
+COPY games ./games
 
 # 构建所有包（按依赖顺序，添加详细日志）
 RUN echo "=== Building shared package ===" && \
@@ -54,14 +63,20 @@ WORKDIR /app
 # 安装生产运行时依赖（bcrypt 需要）
 RUN apk add --no-cache python3 make g++
 
+# 配置 npm 使用淘宝镜像加速
+RUN npm config set registry https://registry.npmmirror.com
+
 # 复制 package.json 文件
 COPY package.json package-lock.json* ./
 COPY packages/server/package.json ./packages/server/package.json
 COPY packages/shared/package.json ./packages/shared/package.json
 COPY packages/game-engine/package.json ./packages/game-engine/package.json
 
-# 安装生产依赖
-RUN npm install --omit=dev
+# 安装生产依赖（使用 npm ci 更快）
+RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi
+
+# 清理 npm 缓存减小镜像体积
+RUN npm cache clean --force
 
 # 清理构建工具以减小镜像（保留运行时依赖）
 RUN apk del python3 make g++
