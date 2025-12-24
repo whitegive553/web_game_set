@@ -22,7 +22,7 @@ export const Achievements: React.FC = () => {
   const loadAchievements = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3001/api/save/achievements', {
+      const response = await fetch('/api/save/achievements', {
         credentials: 'include',
       });
 

@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../store/AuthContext';
 import { getWebSocketClient } from '../../services/websocket-client';
+import { API_CONFIG } from '../../config/api';
 import './AvalonRoom.css';
 
 interface Player {
@@ -110,7 +111,7 @@ export const AvalonRoom: React.FC = () => {
     if (!token || !roomId) return;
 
     try {
-      const response = await fetch(`http://localhost:3001/api/lobby/rooms/${roomId}`, {
+      const response = await fetch(`${API_CONFIG.LOBBY_API}/rooms/${roomId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -147,7 +148,7 @@ export const AvalonRoom: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch(`http://localhost:3001/api/lobby/rooms/${roomId}/ready`, {
+      const response = await fetch(`${API_CONFIG.LOBBY_API}/rooms/${roomId}/ready`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -177,7 +178,7 @@ export const AvalonRoom: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch(`http://localhost:3001/api/avalon/${roomId}/start`, {
+      const response = await fetch(`${API_CONFIG.AVALON_API}/${roomId}/start`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -204,7 +205,7 @@ export const AvalonRoom: React.FC = () => {
     if (!token || !roomId) return;
 
     try {
-      await fetch(`http://localhost:3001/api/lobby/rooms/${roomId}/leave`, {
+      await fetch(`${API_CONFIG.LOBBY_API}/rooms/${roomId}/leave`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

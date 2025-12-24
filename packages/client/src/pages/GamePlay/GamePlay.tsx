@@ -5,6 +5,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { GameHistoryEntry } from '@survival-game/shared';
+import { API_CONFIG } from '../../config/api';
 import './GamePlay.css';
 
 interface StoryEntry {
@@ -56,7 +57,7 @@ export const GamePlay: React.FC = () => {
   const startNewGame = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/game/step', {
+      const response = await fetch(`${API_CONFIG.GAME_API}/step`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -117,7 +118,7 @@ export const GamePlay: React.FC = () => {
         outcome: { summary: `Selected: ${entry.selectedChoiceText}` }
       }));
 
-      const response = await fetch('http://localhost:3001/api/game/step', {
+      const response = await fetch(`${API_CONFIG.GAME_API}/step`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -183,7 +184,7 @@ export const GamePlay: React.FC = () => {
     };
 
     try {
-      await fetch('http://localhost:3001/api/save/history', {
+      await fetch('/api/save/history', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

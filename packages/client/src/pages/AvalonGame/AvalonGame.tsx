@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../store/AuthContext';
 import { getWebSocketClient } from '../../services/websocket-client';
+import { API_CONFIG } from '../../config/api';
 import './AvalonGame.css';
 
 interface Player {
@@ -136,7 +137,7 @@ export const AvalonGame: React.FC = () => {
     if (!token || !matchId) return;
 
     try {
-      const response = await fetch(`http://localhost:3001/api/avalon/${matchId}/state`, {
+      const response = await fetch(`${API_CONFIG.AVALON_API}/${matchId}/state`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -169,7 +170,7 @@ export const AvalonGame: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch(`http://localhost:3001/api/avalon/${matchId}/action`, {
+      const response = await fetch(`${API_CONFIG.AVALON_API}/${matchId}/action`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -230,7 +231,7 @@ export const AvalonGame: React.FC = () => {
 
     try {
       // First, try to find the room for this match
-      const response = await fetch('http://localhost:3001/api/lobby/my-room', {
+      const response = await fetch(`${API_CONFIG.LOBBY_API}/my-room`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -241,7 +242,7 @@ export const AvalonGame: React.FC = () => {
         const roomId = data.data.roomId;
 
         // Leave the room
-        await fetch(`http://localhost:3001/api/lobby/rooms/${roomId}/leave`, {
+        await fetch(`${API_CONFIG.LOBBY_API}/rooms/${roomId}/leave`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`

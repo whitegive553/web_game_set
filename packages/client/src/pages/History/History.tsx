@@ -20,7 +20,7 @@ export const History: React.FC = () => {
   const loadHistory = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3001/api/save/history', {
+      const response = await fetch('/api/save/history', {
         credentials: 'include',
       });
 
