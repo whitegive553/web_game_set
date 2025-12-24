@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../store/AuthContext';
 import { initWebSocketClient } from '../../services/websocket-client';
+import { API_CONFIG } from '../../config/api';
 import './GameLobby.css';
 
 interface Room {
@@ -96,7 +97,7 @@ export const GameLobby: React.FC = () => {
 
     const checkExistingRoom = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/lobby/my-room', {
+        const response = await fetch(`${API_CONFIG.LOBBY_API}/my-room`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -157,7 +158,7 @@ export const GameLobby: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:3001/api/lobby/rooms?gameId=${selectedGame}`,
+        `${API_CONFIG.LOBBY_API}/rooms?gameId=${selectedGame}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -211,7 +212,7 @@ export const GameLobby: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:3001/api/lobby/rooms', {
+      const response = await fetch(`${API_CONFIG.LOBBY_API}/rooms`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -255,7 +256,7 @@ export const GameLobby: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch(`http://localhost:3001/api/lobby/rooms/${roomId}/join`, {
+      const response = await fetch(`${API_CONFIG.LOBBY_API}/rooms/${roomId}/join`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
