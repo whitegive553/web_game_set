@@ -365,10 +365,10 @@ export const GameLobby: React.FC = () => {
                   </div>
                   <button
                     onClick={() => joinRoom(room.roomId)}
-                    disabled={loading || room.status !== 'lobby' || room.players.length >= room.maxPlayers}
+                    disabled={loading || (room.status === 'lobby' && room.players.length >= room.maxPlayers)}
                     className="btn-join-room"
                   >
-                    {room.status !== 'lobby' ? '游戏中' :
+                    {room.status === 'playing' ? '重新加入' :
                      room.players.length >= room.maxPlayers ? '已满' : '加入'}
                   </button>
                 </div>
