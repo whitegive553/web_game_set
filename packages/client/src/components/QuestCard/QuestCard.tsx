@@ -3,23 +3,8 @@
  */
 
 import React, { useState } from 'react';
+import { QuestResult } from '@survival-game/shared';
 import './QuestCard.css';
-
-interface TeamVoteHistory {
-  nominatedTeam: string[];
-  approvals: string[];
-  rejections: string[];
-  passed: boolean;
-}
-
-interface QuestResult {
-  questNumber: number;
-  team: string[];
-  successVotes: number;
-  failVotes: number;
-  success: boolean;
-  teamVoteHistory: TeamVoteHistory[];
-}
 
 interface QuestCardProps {
   questNumber: number;

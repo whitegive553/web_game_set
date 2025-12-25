@@ -9,6 +9,7 @@ import { useAuth } from '../../store/AuthContext';
 import { getWebSocketClient } from '../../services/websocket-client';
 import { API_CONFIG } from '../../config/api';
 import { QuestCard } from '../../components/QuestCard/QuestCard';
+import { QuestResult } from '@survival-game/shared';
 import './AvalonGame.css';
 
 interface Player {
@@ -16,14 +17,6 @@ interface Player {
   username: string;
   ready?: boolean;
   connected?: boolean;
-}
-
-interface QuestResult {
-  questNumber: number;
-  team: string[];
-  successVotes: number;
-  failVotes: number;
-  success: boolean;
 }
 
 interface PublicState {
