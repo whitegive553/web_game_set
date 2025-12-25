@@ -43,6 +43,22 @@ export class AvalonGame {
     if (match.state && (match.state as any).roleAssignments) {
       console.log('[AvalonGame] Restoring game state from match');
       this.state = match.state as any as AvalonGameState;
+
+      // Ensure compatibility with old saved states
+      if (!this.state.currentQuestTeamVotes) {
+        console.log('[AvalonGame] Adding missing currentQuestTeamVotes to restored state');
+        this.state.currentQuestTeamVotes = [];
+      }
+
+      // Fix old quest results that don't have teamVoteHistory
+      if (this.state.questResults) {
+        this.state.questResults.forEach((result, index) => {
+          if (!result.teamVoteHistory) {
+            console.log(`[AvalonGame] Adding missing teamVoteHistory to quest ${index + 1}`);
+            result.teamVoteHistory = [];
+          }
+        });
+      }
     } else {
       console.log('[AvalonGame] Initializing new game state');
       this.state = this.initializeState();
@@ -90,6 +106,11 @@ export class AvalonGame {
     if (this.state.phase !== AvalonPhase.LOBBY) {
       throw new Error('Game already started');
     }
+
+    // Re-initialize state to ensure clean start with random leader
+    // This fixes issues with restored game state from persistence
+    console.log('[AvalonGame] Starting new game - resetting state');
+    this.state = this.initializeState();
 
     // Assign roles
     this.assignRoles();
