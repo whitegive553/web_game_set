@@ -135,7 +135,7 @@ export class AvalonGame {
 
     // Automatically move to nomination after players have seen their roles
     // Changed from 3 seconds to 8 seconds to allow for 5-second countdown + role reveal
-    setTimeout(() => this.startNomination(), 8000);
+    setTimeout(() => this.startNomination(true), 8000); // Start first quest (round 1)
 
     return [event];
   }
@@ -154,9 +154,18 @@ export class AvalonGame {
     });
   }
 
-  private startNomination(): PluginGameEvent[] {
+  /**
+   * Start nomination phase
+   * @param incrementRound - Whether to increment the round (new quest) or stay on same quest (team vote failed)
+   */
+  private startNomination(incrementRound: boolean = true): PluginGameEvent[] {
     this.state.phase = AvalonPhase.NOMINATION;
-    this.state.round++;
+
+    // Only increment round when starting a new quest, not when team vote fails
+    if (incrementRound) {
+      this.state.round++;
+    }
+
     this.state.nominatedTeam = [];
 
     const event: PluginGameEvent = {
@@ -298,10 +307,10 @@ export class AvalonGame {
           visibleTo: 'all',
         });
       } else {
-        // Team rejected, next leader
+        // Team rejected, next leader (stay on same quest round)
         this.advanceLeader();
         this.syncStateToMatch();
-        return events.concat(this.startNomination());
+        return events.concat(this.startNomination(false)); // Don't increment round
       }
     }
 
@@ -392,10 +401,10 @@ export class AvalonGame {
         this.syncStateToMatch();
         return events.concat(this.endGame(AvalonTeam.EVIL, 'Three quests failed'));
       } else {
-        // Continue to next round
+        // Continue to next quest
         this.advanceLeader();
         this.syncStateToMatch();
-        setTimeout(() => this.startNomination(), 2000);
+        setTimeout(() => this.startNomination(true), 2000); // Start next quest
       }
     }
 
