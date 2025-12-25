@@ -1,0 +1,345 @@
+.quest-card {
+  width: 100px;
+  height: 120px;
+  perspective: 1000px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  position: relative;
+  z-index: 1;
+}
+
+.quest-card.completed:hover {
+  transform: scale(1.05);
+}
+
+.quest-card.pending {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.quest-card.flipped {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: none;
+}
+
+.quest-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.quest-card.flipped .quest-card-inner {
+  transform: rotateY(180deg);
+  width: 400px;
+  height: 500px;
+}
+
+.quest-card-front,
+.quest-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.quest-card-front {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.quest-card-front .quest-number {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.quest-card-front .quest-result {
+  font-size: 2.5rem;
+  margin-top: 0.5rem;
+}
+
+.quest-card-front .quest-result.success {
+  color: #4caf50;
+}
+
+.quest-card-front .quest-result.fail {
+  color: #f44336;
+}
+
+.quest-card-front .flip-hint {
+  position: absolute;
+  bottom: 8px;
+  font-size: 0.65rem;
+  opacity: 0.7;
+}
+
+.quest-card-back {
+  transform: rotateY(180deg);
+  background: white;
+  color: #333;
+  padding: 1rem;
+  overflow-y: auto;
+  text-align: left;
+  width: 100%;
+  height: 100%;
+}
+
+.quest-card-back .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.quest-card-back h4 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.quest-card-back .result-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.quest-card-back .result-badge.success {
+  background: #4caf50;
+  color: white;
+}
+
+.quest-card-back .result-badge.fail {
+  background: #f44336;
+  color: white;
+}
+
+.quest-card-back .card-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.quest-card-back .section {
+  margin-bottom: 1.5rem;
+}
+
+.quest-card-back .section h5 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.quest-card-back .player-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.quest-card-back .player-tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: #667eea;
+  color: white;
+  border-radius: 20px;
+  font-size: 0.85rem;
+}
+
+.quest-card-back .player-tag.small {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.quest-card-back .player-tag.success {
+  background: #4caf50;
+}
+
+.quest-card-back .player-tag.fail {
+  background: #f44336;
+}
+
+.quest-card-back .vote-stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.quest-card-back .vote-count {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.quest-card-back .vote-count.success {
+  background: #e8f5e9;
+  color: #4caf50;
+}
+
+.quest-card-back .vote-count.fail {
+  background: #ffebee;
+  color: #f44336;
+}
+
+.quest-card-back .vote-round {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: #f5f5f5;
+}
+
+.quest-card-back .vote-round.passed {
+  border-left: 4px solid #4caf50;
+}
+
+.quest-card-back .vote-round.rejected {
+  border-left: 4px solid #f44336;
+}
+
+.quest-card-back .vote-round-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.quest-card-back .round-number {
+  font-size: 0.85rem;
+}
+
+.quest-card-back .round-result {
+  font-size: 0.8rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+}
+
+.quest-card-back .round-result.passed {
+  background: #4caf50;
+  color: white;
+}
+
+.quest-card-back .round-result.rejected {
+  background: #f44336;
+  color: white;
+}
+
+.quest-card-back .vote-details {
+  font-size: 0.85rem;
+}
+
+.quest-card-back .nominated-team,
+.quest-card-back .all-votes {
+  margin-top: 0.5rem;
+}
+
+.quest-card-back .nominated-team strong,
+.quest-card-back .all-votes strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #666;
+}
+
+.quest-card-back .vote-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.5rem;
+}
+
+.quest-card-back .vote-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  border: 2px solid;
+  background: white;
+}
+
+.quest-card-back .vote-item.approve {
+  border-color: #2196f3;
+  background: #e3f2fd;
+}
+
+.quest-card-back .vote-item.reject {
+  border-color: #f44336;
+  background: #ffebee;
+}
+
+.quest-card-back .vote-item .player-name {
+  font-weight: 600;
+  flex: 1;
+}
+
+.quest-card-back .vote-item.approve .player-name {
+  color: #1565c0;
+}
+
+.quest-card-back .vote-item.reject .player-name {
+  color: #c62828;
+}
+
+.quest-card-back .vote-item .vote-badge {
+  font-size: 0.75rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.quest-card-back .vote-item.approve .vote-badge {
+  background: #2196f3;
+  color: white;
+}
+
+.quest-card-back .vote-item.reject .vote-badge {
+  background: #f44336;
+  color: white;
+}
+
+.quest-card-back .flip-hint {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  opacity: 0.5;
+}
+
+/* Overlay when card is flipped */
+.quest-card.flipped::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: -1;
+}
+
+.quest-card.flipped .quest-card-inner {
+  z-index: 1;
+}
+
+.quest-card-front {
+  backface-visibility: hidden;
+}
+
+.quest-card-back {
+  backface-visibility: hidden;
+}

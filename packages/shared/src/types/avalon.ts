@@ -85,6 +85,9 @@ export interface AvalonGameState {
   teamVotes: Record<string, boolean>; // userId -> approve/reject
   questVotes: Record<string, boolean>; // userId -> success/fail (only team members)
 
+  // Team vote history for current quest (accumulated until quest completes)
+  currentQuestTeamVotes: TeamVoteHistory[];
+
   // Assassination
   assassinTarget?: string;    // userId
 
@@ -95,12 +98,22 @@ export interface AvalonGameState {
   roleAssignments: Record<string, AvalonRole>;
 }
 
+export interface TeamVoteHistory {
+  nominatedTeam: string[];    // userIds who were nominated
+  approvals: string[];        // userIds who approved
+  rejections: string[];       // userIds who rejected
+  passed: boolean;            // Whether team was approved
+}
+
 export interface QuestResult {
   questNumber: number;
   team: string[];             // userIds who went on quest
   successVotes: number;
   failVotes: number;
   success: boolean;
+
+  // Vote history for this quest (may have multiple team votes before approval)
+  teamVoteHistory: TeamVoteHistory[];
 }
 
 // ============================================================================

@@ -54,17 +54,23 @@ export class AvalonGame {
   // ============================================================================
 
   private initializeState(): AvalonGameState {
+    // Randomize first leader instead of always using first player
+    const randomLeaderIndex = Math.floor(Math.random() * this.match.players.length);
+
+    console.log(`[AvalonGame] Initializing new game - Random first leader index: ${randomLeaderIndex} (player: ${this.match.players[randomLeaderIndex].username})`);
+
     return {
       phase: AvalonPhase.LOBBY,
       round: 0,
-      leader: this.match.players[0].userId,
-      leaderIndex: 0,
+      leader: this.match.players[randomLeaderIndex].userId,
+      leaderIndex: randomLeaderIndex,
       questResults: [],
       goodWins: 0,
       evilWins: 0,
       nominatedTeam: [],
       teamVotes: {},
       questVotes: {},
+      currentQuestTeamVotes: [],
       roleAssignments: {},
     };
   }
@@ -225,6 +231,24 @@ export class AvalonGame {
       const approveCount = Object.values(this.state.teamVotes).filter(v => v).length;
       const majority = approveCount > this.match.players.length / 2;
 
+      // Record team vote history
+      const approvals: string[] = [];
+      const rejections: string[] = [];
+      for (const [userId, vote] of Object.entries(this.state.teamVotes)) {
+        if (vote) {
+          approvals.push(userId);
+        } else {
+          rejections.push(userId);
+        }
+      }
+
+      this.state.currentQuestTeamVotes.push({
+        nominatedTeam: [...this.state.nominatedTeam],
+        approvals,
+        rejections,
+        passed: majority,
+      });
+
       events.push({
         eventId: `event_${Date.now() + 1}`,
         matchId: this.match.matchId,
@@ -311,9 +335,13 @@ export class AvalonGame {
         successVotes,
         failVotes,
         success: questSuccess,
+        teamVoteHistory: [...this.state.currentQuestTeamVotes],
       };
 
       this.state.questResults.push(result);
+
+      // Clear team vote history for next quest
+      this.state.currentQuestTeamVotes = [];
 
       if (questSuccess) {
         this.state.goodWins++;

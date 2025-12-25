@@ -8,6 +8,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../store/AuthContext';
 import { getWebSocketClient } from '../../services/websocket-client';
 import { API_CONFIG } from '../../config/api';
+import { QuestCard } from '../../components/QuestCard/QuestCard';
 import './AvalonGame.css';
 
 interface Player {
@@ -484,10 +485,12 @@ export const AvalonGame: React.FC = () => {
               {[1, 2, 3, 4, 5].map(questNum => {
                 const result = publicState.questResults.find(q => q.questNumber === questNum);
                 return (
-                  <div key={questNum} className={`quest-marker ${result ? (result.success ? 'success' : 'fail') : 'pending'}`}>
-                    <div className="quest-number">{questNum}</div>
-                    {result && <div className="quest-result">{result.success ? '✓' : '✗'}</div>}
-                  </div>
+                  <QuestCard
+                    key={questNum}
+                    questNumber={questNum}
+                    result={result}
+                    getPlayerName={getPlayerName}
+                  />
                 );
               })}
             </div>
