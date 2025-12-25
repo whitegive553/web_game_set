@@ -1,18 +1,12 @@
 {
   "rooms": {
-    "room_1766637825604_kv8ciy1pv": {
-      "roomId": "room_1766637825604_kv8ciy1pv",
+    "room_1766638624371_3kr81zjgd": {
+      "roomId": "room_1766638624371_3kr81zjgd",
       "gameId": "avalon",
-      "hostUserId": "34b83565e353b116ed653a085a320d52",
+      "hostUserId": "9f96550bbe60eed7f24252e78cd6b2ea",
       "name": "123",
       "maxPlayers": 6,
       "players": [
-        {
-          "userId": "34b83565e353b116ed653a085a320d52",
-          "username": "aipengze",
-          "ready": false,
-          "connected": true
-        },
         {
           "userId": "9f96550bbe60eed7f24252e78cd6b2ea",
           "username": "test2",
@@ -42,16 +36,40 @@
           "username": "test1",
           "ready": true,
           "connected": true
+        },
+        {
+          "userId": "34b83565e353b116ed653a085a320d52",
+          "username": "aipengze",
+          "ready": true,
+          "connected": true
         }
       ],
-      "createdAt": 1766637825604,
+      "createdAt": 1766638624371,
       "status": "playing",
       "match": {
-        "matchId": "match_1766637841150_l6raxmzq5",
-        "roomId": "room_1766637825604_kv8ciy1pv",
+        "matchId": "match_1766638641164_tcniilnwa",
+        "roomId": "room_1766638624371_3kr81zjgd",
         "gameId": "avalon",
         "state": {
-          "phase": "LOBBY"
+          "phase": "NOMINATION",
+          "round": 1,
+          "leader": "79ada627ecc7ec4c7b5b6a8a5c74887a",
+          "leaderIndex": 4,
+          "questResults": [],
+          "goodWins": 0,
+          "evilWins": 0,
+          "nominatedTeam": [],
+          "teamVotes": {},
+          "questVotes": {},
+          "currentQuestTeamVotes": [],
+          "roleAssignments": {
+            "79ada627ecc7ec4c7b5b6a8a5c74887a": "merlin",
+            "f7aa9b397a34bf5cb73af3b25c12fb02": "percival",
+            "9f96550bbe60eed7f24252e78cd6b2ea": "loyal_servant",
+            "34b83565e353b116ed653a085a320d52": "loyal_servant",
+            "cf16e37178cfb0c65b38165cf198741a": "assassin",
+            "030df312b3ac49f9a3569413af6b5452": "morgana"
+          }
         },
         "players": [
           {
@@ -91,7 +109,7 @@
             "connected": true
           }
         ],
-        "createdAt": 1766637841150
+        "createdAt": 1766638641164
       },
       "originalPlayers": [
         "34b83565e353b116ed653a085a320d52",
@@ -101,7 +119,7 @@
         "79ada627ecc7ec4c7b5b6a8a5c74887a",
         "030df312b3ac49f9a3569413af6b5452"
       ],
-      "gameStartedAt": 1766637841151
+      "gameStartedAt": 1766638641164
     }
   }
 }
