@@ -17,6 +17,10 @@ export interface Room {
   match?: GameMatch;      // Active game match
   createdAt: number;
   status: 'lobby' | 'playing' | 'finished';
+
+  // Track original players when game starts (for reconnection control)
+  originalPlayers?: string[];  // userIds of players when game started
+  gameStartedAt?: number;      // Timestamp when game started (for auto-cleanup)
 }
 
 interface RoomsData {
@@ -31,6 +35,7 @@ class RoomManager {
   private rooms: Map<string, Room> = new Map();
   private cleanupInterval: NodeJS.Timeout | null = null;
   private readonly ROOM_MAX_AGE = 10 * 60 * 60 * 1000; // 10 hours in milliseconds
+  private readonly GAME_MAX_DURATION = 5 * 60 * 60 * 1000; // 5 hours in milliseconds
 
   constructor() {
     this.store = new JsonStore<RoomsData>(ROOMS_FILE);
@@ -80,13 +85,14 @@ class RoomManager {
 
   /**
    * List all active rooms for a game
+   * Returns rooms in 'lobby' or 'playing' status (not 'finished')
    */
   listRooms(gameId?: string): Room[] {
     const allRooms = Array.from(this.rooms.values());
     if (gameId) {
-      return allRooms.filter(r => r.gameId === gameId && r.status === 'lobby');
+      return allRooms.filter(r => r.gameId === gameId && (r.status === 'lobby' || r.status === 'playing'));
     }
-    return allRooms.filter(r => r.status === 'lobby');
+    return allRooms.filter(r => r.status === 'lobby' || r.status === 'playing');
   }
 
   /**
@@ -98,6 +104,8 @@ class RoomManager {
 
   /**
    * Join a room
+   * - Lobby rooms: anyone can join
+   * - Playing rooms: only original players can rejoin
    */
   async joinRoom(roomId: string, userId: string, username: string): Promise<Room> {
     const room = this.rooms.get(roomId);
@@ -105,39 +113,63 @@ class RoomManager {
       throw new Error('Room not found');
     }
 
-    if (room.status !== 'lobby') {
-      throw new Error('Room is not in lobby');
-    }
-
-    if (room.players.length >= room.maxPlayers) {
-      throw new Error('Room is full');
-    }
-
     // Check if user is already in this room
-    if (room.players.some(p => p.userId === userId)) {
-      // User is already in this room, just return it
-      console.log(`[RoomManager] User ${userId} already in room ${roomId}, returning existing room`);
+    const existingPlayer = room.players.find(p => p.userId === userId);
+    if (existingPlayer) {
+      // User is already in this room, update connection status and return
+      console.log(`[RoomManager] User ${userId} already in room ${roomId}, updating connection status`);
+      existingPlayer.connected = true;
+      await this.persist();
       return room;
     }
 
-    // Check if user is in a different room and remove them
-    const existingRoom = this.findRoomByUserId(userId);
-    if (existingRoom && existingRoom.roomId !== roomId) {
-      console.log(`[RoomManager] User ${userId} is in room ${existingRoom.roomId}, leaving before joining ${roomId}`);
-      await this.leaveRoom(existingRoom.roomId, userId);
+    // Handle joining based on room status
+    if (room.status === 'lobby') {
+      // Lobby: normal join logic
+      if (room.players.length >= room.maxPlayers) {
+        throw new Error('Room is full');
+      }
+
+      // Check if user is in a different room and remove them
+      const existingRoom = this.findRoomByUserId(userId);
+      if (existingRoom && existingRoom.roomId !== roomId) {
+        console.log(`[RoomManager] User ${userId} is in room ${existingRoom.roomId}, leaving before joining ${roomId}`);
+        await this.leaveRoom(existingRoom.roomId, userId);
+      }
+
+      const player: PluginGamePlayer = {
+        userId,
+        username,
+        ready: false,
+        connected: true,
+      };
+
+      room.players.push(player);
+      await this.persist();
+
+      return room;
+    } else if (room.status === 'playing') {
+      // Playing: only original players can rejoin
+      if (!room.originalPlayers || !room.originalPlayers.includes(userId)) {
+        throw new Error('Only original players can rejoin a game in progress');
+      }
+
+      // Re-add the player (they must have left during the game)
+      const player: PluginGamePlayer = {
+        userId,
+        username,
+        ready: true,  // Keep them ready since game is ongoing
+        connected: true,
+      };
+
+      room.players.push(player);
+      await this.persist();
+
+      console.log(`[RoomManager] Original player ${userId} rejoined playing room ${roomId}`);
+      return room;
+    } else {
+      throw new Error('Cannot join a finished game');
     }
-
-    const player: PluginGamePlayer = {
-      userId,
-      username,
-      ready: false,
-      connected: true,
-    };
-
-    room.players.push(player);
-    await this.persist();
-
-    return room;
   }
 
   /**
@@ -189,6 +221,7 @@ class RoomManager {
 
   /**
    * Start game
+   * Records original players and start time for reconnection control and auto-cleanup
    */
   async startGame(roomId: string, match: GameMatch): Promise<Room> {
     const room = this.rooms.get(roomId);
@@ -198,6 +231,15 @@ class RoomManager {
 
     room.match = match;
     room.status = 'playing';
+
+    // Record original players for reconnection control
+    room.originalPlayers = room.players.map(p => p.userId);
+
+    // Record game start time for auto-cleanup (5 hours)
+    room.gameStartedAt = Date.now();
+
+    console.log(`[RoomManager] Game started in room ${roomId} with ${room.originalPlayers.length} players`);
+
     await this.persist();
 
     return room;
@@ -268,16 +310,36 @@ class RoomManager {
   }
 
   /**
-   * Clean up rooms older than 10 hours
+   * Clean up old rooms:
+   * - Rooms older than 10 hours (based on creation time)
+   * - Games running longer than 5 hours (based on game start time)
    */
   private async cleanupOldRooms(): Promise<void> {
     const now = Date.now();
     const roomsToDelete: string[] = [];
 
     for (const [roomId, room] of this.rooms.entries()) {
-      const age = now - room.createdAt;
-      if (age > this.ROOM_MAX_AGE) {
-        console.log(`[RoomManager] Cleaning up old room ${roomId} (age: ${Math.round(age / 1000 / 60 / 60)}h)`);
+      let shouldDelete = false;
+      let reason = '';
+
+      // Check room age (10 hours since creation)
+      const roomAge = now - room.createdAt;
+      if (roomAge > this.ROOM_MAX_AGE) {
+        shouldDelete = true;
+        reason = `room age: ${Math.round(roomAge / 1000 / 60 / 60)}h`;
+      }
+
+      // Check game duration for playing rooms (5 hours since game start)
+      if (room.status === 'playing' && room.gameStartedAt) {
+        const gameDuration = now - room.gameStartedAt;
+        if (gameDuration > this.GAME_MAX_DURATION) {
+          shouldDelete = true;
+          reason = `game running for ${Math.round(gameDuration / 1000 / 60 / 60)}h (max 5h)`;
+        }
+      }
+
+      if (shouldDelete) {
+        console.log(`[RoomManager] Cleaning up room ${roomId} (${reason})`);
         roomsToDelete.push(roomId);
       }
     }
