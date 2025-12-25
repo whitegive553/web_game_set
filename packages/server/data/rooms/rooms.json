@@ -1,33 +1,15 @@
 {
   "rooms": {
-    "room_1766468831521_vt5st1m3i": {
-      "roomId": "room_1766468831521_vt5st1m3i",
+    "room_1766636555008_ty8b8zpkp": {
+      "roomId": "room_1766636555008_ty8b8zpkp",
       "gameId": "avalon",
-      "hostUserId": "34b83565e353b116ed653a085a320d52",
+      "hostUserId": "9f96550bbe60eed7f24252e78cd6b2ea",
       "name": "123",
       "maxPlayers": 6,
       "players": [
         {
-          "userId": "34b83565e353b116ed653a085a320d52",
-          "username": "aipengze",
-          "ready": true,
-          "connected": true
-        },
-        {
           "userId": "9f96550bbe60eed7f24252e78cd6b2ea",
           "username": "test2",
-          "ready": true,
-          "connected": true
-        },
-        {
-          "userId": "030df312b3ac49f9a3569413af6b5452",
-          "username": "test1",
-          "ready": true,
-          "connected": true
-        },
-        {
-          "userId": "cf16e37178cfb0c65b38165cf198741a",
-          "username": "test3",
           "ready": true,
           "connected": true
         },
@@ -42,33 +24,90 @@
           "username": "123",
           "ready": true,
           "connected": true
+        },
+        {
+          "userId": "34b83565e353b116ed653a085a320d52",
+          "username": "aipengze",
+          "ready": true,
+          "connected": true
+        },
+        {
+          "userId": "030df312b3ac49f9a3569413af6b5452",
+          "username": "test1",
+          "ready": true,
+          "connected": true
         }
       ],
-      "createdAt": 1766468831521,
+      "createdAt": 1766636555008,
       "status": "playing",
       "match": {
-        "matchId": "match_1766468933687_gm1c0x3yw",
-        "roomId": "room_1766468831521_vt5st1m3i",
+        "matchId": "match_1766636615386_t01yx45i4",
+        "roomId": "room_1766636555008_ty8b8zpkp",
         "gameId": "avalon",
         "state": {
-          "phase": "LOBBY"
+          "phase": "NOMINATION",
+          "round": 2,
+          "leader": "79ada627ecc7ec4c7b5b6a8a5c74887a",
+          "leaderIndex": 3,
+          "questResults": [
+            {
+              "questNumber": 1,
+              "team": [
+                "9f96550bbe60eed7f24252e78cd6b2ea",
+                "cf16e37178cfb0c65b38165cf198741a"
+              ],
+              "successVotes": 2,
+              "failVotes": 0,
+              "success": true,
+              "teamVoteHistory": [
+                {
+                  "nominatedTeam": [
+                    "9f96550bbe60eed7f24252e78cd6b2ea",
+                    "cf16e37178cfb0c65b38165cf198741a"
+                  ],
+                  "approvals": [
+                    "f7aa9b397a34bf5cb73af3b25c12fb02",
+                    "cf16e37178cfb0c65b38165cf198741a",
+                    "9f96550bbe60eed7f24252e78cd6b2ea",
+                    "34b83565e353b116ed653a085a320d52",
+                    "79ada627ecc7ec4c7b5b6a8a5c74887a",
+                    "030df312b3ac49f9a3569413af6b5452"
+                  ],
+                  "rejections": [],
+                  "passed": true
+                }
+              ]
+            }
+          ],
+          "goodWins": 1,
+          "evilWins": 0,
+          "nominatedTeam": [],
+          "teamVotes": {
+            "f7aa9b397a34bf5cb73af3b25c12fb02": true,
+            "cf16e37178cfb0c65b38165cf198741a": true,
+            "9f96550bbe60eed7f24252e78cd6b2ea": true,
+            "34b83565e353b116ed653a085a320d52": true,
+            "79ada627ecc7ec4c7b5b6a8a5c74887a": true,
+            "030df312b3ac49f9a3569413af6b5452": true
+          },
+          "questVotes": {
+            "cf16e37178cfb0c65b38165cf198741a": true,
+            "9f96550bbe60eed7f24252e78cd6b2ea": true
+          },
+          "currentQuestTeamVotes": [],
+          "roleAssignments": {
+            "34b83565e353b116ed653a085a320d52": "merlin",
+            "9f96550bbe60eed7f24252e78cd6b2ea": "percival",
+            "030df312b3ac49f9a3569413af6b5452": "loyal_servant",
+            "79ada627ecc7ec4c7b5b6a8a5c74887a": "loyal_servant",
+            "cf16e37178cfb0c65b38165cf198741a": "assassin",
+            "f7aa9b397a34bf5cb73af3b25c12fb02": "morgana"
+          }
         },
         "players": [
           {
-            "userId": "34b83565e353b116ed653a085a320d52",
-            "username": "aipengze",
-            "ready": true,
-            "connected": true
-          },
-          {
             "userId": "9f96550bbe60eed7f24252e78cd6b2ea",
             "username": "test2",
-            "ready": true,
-            "connected": true
-          },
-          {
-            "userId": "030df312b3ac49f9a3569413af6b5452",
-            "username": "test1",
             "ready": true,
             "connected": true
           },
@@ -89,9 +128,21 @@
             "username": "123",
             "ready": true,
             "connected": true
+          },
+          {
+            "userId": "34b83565e353b116ed653a085a320d52",
+            "username": "aipengze",
+            "ready": true,
+            "connected": true
+          },
+          {
+            "userId": "030df312b3ac49f9a3569413af6b5452",
+            "username": "test1",
+            "ready": true,
+            "connected": true
           }
         ],
-        "createdAt": 1766468933687
+        "createdAt": 1766636615386
       }
     }
   }
