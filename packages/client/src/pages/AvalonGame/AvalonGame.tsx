@@ -10,6 +10,7 @@ import { getWebSocketClient } from '../../services/websocket-client';
 import { API_CONFIG } from '../../config/api';
 import { QuestCard } from '../../components/QuestCard/QuestCard';
 import { QuestResult } from '@survival-game/shared';
+import { AvalonHelp } from '../../components/AvalonHelp/AvalonHelp';
 import './AvalonGame.css';
 
 interface Player {
@@ -55,6 +56,7 @@ export const AvalonGame: React.FC = () => {
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   // Game start states
   const [countdown, setCountdown] = useState(5);
@@ -420,6 +422,9 @@ export const AvalonGame: React.FC = () => {
             <span className="user-icon">👤</span>
             {user?.username}
           </span>
+          <button onClick={() => setShowHelp(true)} className="btn-help-game">
+            帮助
+          </button>
           <button onClick={handleExitGame} className="btn-exit">
             退出游戏
           </button>
@@ -645,6 +650,9 @@ export const AvalonGame: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Help Modal */}
+      <AvalonHelp isOpen={showHelp} onClose={() => setShowHelp(false)} />
     </div>
   );
 };

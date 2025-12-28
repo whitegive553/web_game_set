@@ -36,16 +36,7 @@ export const GameLobby: React.FC = () => {
   const [maxPlayers, setMaxPlayers] = useState(6);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Debug log
-  console.log('[GameLobby] Component rendered', {
-    selectedGame,
-    showCreateModal,
-    loading,
-    hasToken: !!token,
-    tokenLength: token?.length,
-    user: user?.username
-  });
+  const [wsConnected, setWsConnected] = useState(false);
 
   // Initialize WebSocket (OPTIONAL - uses polling as fallback)
   useEffect(() => {
@@ -62,17 +53,20 @@ export const GameLobby: React.FC = () => {
 
       wsClient.connect()
         .then(() => {
-          console.log('[Lobby] ✅ WebSocket connected (real-time updates enabled)');
+          console.log('[Lobby] ✅ WebSocket connected (real-time updates enabled, polling disabled)');
+          setWsConnected(true);
 
           // Listen for room updates
           wsClient.on('PLAYER_JOINED', handlePlayerJoined);
           wsClient.on('PLAYER_LEFT', handlePlayerLeft);
           wsClient.on('PLAYER_READY', handlePlayerReady);
           wsClient.on('ROOM_DELETED', handleRoomDeleted);
+          wsClient.on('ROOM_CREATED', handleRoomCreated);
         })
         .catch(error => {
           console.warn('[Lobby] ⚠️ WebSocket connection failed, using polling fallback');
           console.debug('[Lobby] WS Error:', error);
+          setWsConnected(false);
           // Don't throw - polling will handle updates
         });
 
@@ -84,9 +78,11 @@ export const GameLobby: React.FC = () => {
         wsClient.off('PLAYER_LEFT', handlePlayerLeft);
         wsClient.off('PLAYER_READY', handlePlayerReady);
         wsClient.off('ROOM_DELETED', handleRoomDeleted);
+        wsClient.off('ROOM_CREATED', handleRoomCreated);
       };
     } catch (error) {
       console.error('[GameLobby] WebSocket init error:', error);
+      setWsConnected(false);
       // Continue without WebSocket - polling will work
     }
   }, [token]);
@@ -127,29 +123,46 @@ export const GameLobby: React.FC = () => {
   }, [token, navigate]);
 
   // Fetch rooms on mount and when game selection changes
+  // 智能轮询：只在WebSocket未连接时启用
   useEffect(() => {
     fetchRooms();
-    const interval = setInterval(fetchRooms, 5000); // Refresh every 5 seconds
+
+    // 如果WebSocket已连接，使用低频率心跳检测（30秒）
+    // 如果WebSocket未连接，使用正常轮询（5秒）
+    const pollingInterval = wsConnected ? 30000 : 5000;
+
+    if (wsConnected) {
+      console.log('[Lobby] WebSocket active, using 30s heartbeat polling');
+    } else {
+      console.log('[Lobby] WebSocket inactive, using 5s polling fallback');
+    }
+
+    const interval = setInterval(fetchRooms, pollingInterval);
     return () => clearInterval(interval);
-  }, [selectedGame]);
+  }, [selectedGame, wsConnected]);
 
   const handlePlayerJoined = (payload: any) => {
-    console.log('[Lobby] Player joined:', payload);
+    console.log('[Lobby] Player joined (WebSocket):', payload);
     fetchRooms();
   };
 
   const handlePlayerLeft = (payload: any) => {
-    console.log('[Lobby] Player left:', payload);
+    console.log('[Lobby] Player left (WebSocket):', payload);
     fetchRooms();
   };
 
   const handlePlayerReady = (payload: any) => {
-    console.log('[Lobby] Player ready:', payload);
+    console.log('[Lobby] Player ready (WebSocket):', payload);
     fetchRooms();
   };
 
   const handleRoomDeleted = (payload: any) => {
-    console.log('[Lobby] Room deleted:', payload);
+    console.log('[Lobby] Room deleted (WebSocket):', payload);
+    fetchRooms();
+  };
+
+  const handleRoomCreated = (payload: any) => {
+    console.log('[Lobby] Room created (WebSocket):', payload);
     fetchRooms();
   };
 
@@ -315,14 +328,14 @@ export const GameLobby: React.FC = () => {
               <p>角色扮演 · 推理 · 投票</p>
             </div>
             <div
-              className={`game-card ${selectedGame === 'text-adventure' ? 'selected' : ''}`}
-              onClick={() => handleGameSelect('text-adventure')}
+              className="game-card disabled"
               role="button"
-              tabIndex={0}
+              tabIndex={-1}
             >
               <h3>文字冒险</h3>
               <p>单人游戏</p>
               <p>叙事 · 探索 · 决策</p>
+              <div className="maintenance-badge">🔧 维护中</div>
             </div>
           </div>
         </div>

@@ -29,6 +29,7 @@ export * from './types/game-plugin';
 
 // Avalon Game exports
 export * from './types/avalon';
+export * from './avalon-config-utils';
 
 // Constants exports
 export * from './constants';

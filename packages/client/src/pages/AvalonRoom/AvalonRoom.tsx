@@ -8,6 +8,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../store/AuthContext';
 import { getWebSocketClient } from '../../services/websocket-client';
 import { API_CONFIG } from '../../config/api';
+import { AvalonRoomConfig } from '../../components/AvalonRoomConfig/AvalonRoomConfig';
+import { AvalonHelp } from '../../components/AvalonHelp/AvalonHelp';
 import './AvalonRoom.css';
 
 interface Player {
@@ -26,6 +28,22 @@ interface GameMatch {
   createdAt: number;
 }
 
+interface RoleConfiguration {
+  merlin: number;
+  percival: number;
+  loyalServant: number;
+  assassin: number;
+  morgana: number;
+  mordred: number;
+  oberon: number;
+  minion: number;
+}
+
+interface AvalonRoomConfigData {
+  targetPlayerCount: number;
+  roleConfig: RoleConfiguration;
+}
+
 interface Room {
   roomId: string;
   gameId: string;
@@ -36,6 +54,7 @@ interface Room {
   match?: GameMatch;
   status: 'lobby' | 'playing' | 'finished';
   createdAt: number;
+  avalonConfig?: AvalonRoomConfigData;
 }
 
 export const AvalonRoom: React.FC = () => {
@@ -46,15 +65,41 @@ export const AvalonRoom: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [wsConnected, setWsConnected] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
-  // Fetch room data
+  // Ensure user is in the room (handle page refresh)
   useEffect(() => {
-    if (!token || !roomId) return;
+    if (!token || !roomId || !user) return;
 
-    fetchRoom();
-    const interval = setInterval(fetchRoom, 2000);
-    return () => clearInterval(interval);
-  }, [token, roomId]);
+    const ensureInRoom = async () => {
+      try {
+        // Try to join/rejoin the room
+        const response = await fetch(`${API_CONFIG.LOBBY_API}/rooms/${roomId}/join`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+        if (!data.success) {
+          console.error('[AvalonRoom] Failed to join room:', data.error);
+          setError(data.error || 'Failed to join room');
+          // Navigate back to lobby after a delay
+          setTimeout(() => navigate('/lobby'), 2000);
+        } else {
+          console.log('[AvalonRoom] Successfully joined/rejoined room');
+        }
+      } catch (error) {
+        console.error('[AvalonRoom] Error joining room:', error);
+        setError('Failed to connect to room');
+      }
+    };
+
+    ensureInRoom();
+  }, [token, roomId, user, navigate]);
 
   // Join WebSocket room
   useEffect(() => {
@@ -62,6 +107,8 @@ export const AvalonRoom: React.FC = () => {
 
     const wsClient = getWebSocketClient();
     if (wsClient && wsClient.isConnected()) {
+      console.log('[AvalonRoom] WebSocket connected, enabling real-time updates');
+      setWsConnected(true);
       wsClient.joinRoom(roomId);
 
       // Listen for room events
@@ -69,19 +116,50 @@ export const AvalonRoom: React.FC = () => {
       wsClient.on('PLAYER_LEFT', handleRoomUpdate);
       wsClient.on('PLAYER_READY', handleRoomUpdate);
       wsClient.on('GAME_EVENT', handleGameEvent);
+      wsClient.on('ROOM_CONFIG_UPDATED', handleConfigUpdate);
 
       return () => {
         wsClient.off('PLAYER_JOINED', handleRoomUpdate);
         wsClient.off('PLAYER_LEFT', handleRoomUpdate);
         wsClient.off('PLAYER_READY', handleRoomUpdate);
         wsClient.off('GAME_EVENT', handleGameEvent);
+        wsClient.off('ROOM_CONFIG_UPDATED', handleConfigUpdate);
         wsClient.leaveRoom();
       };
+    } else {
+      console.log('[AvalonRoom] WebSocket not connected, using polling fallback');
+      setWsConnected(false);
     }
   }, [roomId]);
 
+  // Fetch room data with smart polling
+  // 智能轮询：WebSocket连接时降低频率，断开时提高频率
+  useEffect(() => {
+    if (!token || !roomId) return;
+
+    fetchRoom();
+
+    // WebSocket连接 → 5秒轻量级轮询（保证数据一致性）
+    // WebSocket断开 → 2秒轮询fallback（保证实时性）
+    const pollingInterval = wsConnected ? 5000 : 2000;
+
+    if (wsConnected) {
+      console.log('[AvalonRoom] WebSocket active, using 5s polling for data consistency');
+    } else {
+      console.log('[AvalonRoom] WebSocket inactive, using 2s polling fallback');
+    }
+
+    const interval = setInterval(fetchRoom, pollingInterval);
+    return () => clearInterval(interval);
+  }, [token, roomId, wsConnected]);
+
   const handleRoomUpdate = (payload: any) => {
-    console.log('[AvalonRoom] Room update:', payload);
+    console.log('[AvalonRoom] Room update (WebSocket):', payload);
+    fetchRoom();
+  };
+
+  const handleConfigUpdate = (payload: any) => {
+    console.log('[AvalonRoom] Config updated (WebSocket):', payload);
     fetchRoom();
   };
 
@@ -201,6 +279,33 @@ export const AvalonRoom: React.FC = () => {
     }
   };
 
+  const updateConfig = async (config: AvalonRoomConfigData) => {
+    if (!token || !roomId) return;
+
+    try {
+      const response = await fetch(`${API_CONFIG.AVALON_API}/${roomId}/config`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(config)
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        console.log('[AvalonRoom] Config updated successfully');
+        await fetchRoom();
+      } else {
+        throw new Error(data.error || 'Failed to update config');
+      }
+    } catch (error) {
+      console.error('[AvalonRoom] Update config error:', error);
+      setError(error instanceof Error ? error.message : 'Failed to update configuration');
+      throw error;
+    }
+  };
+
   const leaveRoom = async () => {
     if (!token || !roomId) return;
 
@@ -231,7 +336,26 @@ export const AvalonRoom: React.FC = () => {
   const isHost = user?.id === room.hostUserId;
   // Host is always considered ready - only check if other players are ready
   const allReady = room.players.every(p => p.userId === room.hostUserId || p.ready);
-  const canStart = isHost && allReady && room.players.length >= 6 && room.players.length <= 10;
+
+  // 使用配置中的目标人数或房间的maxPlayers
+  const targetPlayerCount = room.avalonConfig?.targetPlayerCount || room.maxPlayers;
+  const canStart = isHost && allReady && room.players.length >= 6 && room.players.length <= 10 &&
+                   room.players.length === targetPlayerCount;
+
+  // 如果没有配置，创建默认配置
+  const defaultConfig: AvalonRoomConfigData = {
+    targetPlayerCount: room.maxPlayers,
+    roleConfig: {
+      merlin: 1,
+      percival: 1,
+      loyalServant: Math.max(0, room.maxPlayers >= 6 ? (room.maxPlayers >= 8 ? 3 : 2) : 0),
+      assassin: 1,
+      morgana: 1,
+      mordred: room.maxPlayers >= 9 ? 1 : 0,
+      oberon: 0,
+      minion: Math.max(0, room.maxPlayers >= 7 ? 1 : 0)
+    }
+  };
 
   return (
     <div className="avalon-room">
@@ -240,9 +364,14 @@ export const AvalonRoom: React.FC = () => {
           <h1>{room.name}</h1>
           <p className="room-subtitle">阿瓦隆游戏房间</p>
         </div>
-        <button onClick={leaveRoom} className="btn-leave">
-          离开房间
-        </button>
+        <div className="room-header-actions">
+          <button onClick={() => setShowHelp(true)} className="btn-help">
+            帮助
+          </button>
+          <button onClick={leaveRoom} className="btn-leave">
+            离开房间
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -253,8 +382,17 @@ export const AvalonRoom: React.FC = () => {
       )}
 
       <div className="room-content">
-        {/* Room Info */}
-        <div className="room-info-panel">
+        {/* 配置面板 */}
+        <AvalonRoomConfig
+          config={room.avalonConfig || defaultConfig}
+          currentPlayerCount={room.players.length}
+          isHost={isHost}
+          onConfigUpdate={updateConfig}
+        />
+
+        <div className="room-panels">
+          {/* Room Info */}
+          <div className="room-info-panel">
           <h2>房间信息</h2>
           <div className="info-item">
             <span>房主:</span>
@@ -262,7 +400,7 @@ export const AvalonRoom: React.FC = () => {
           </div>
           <div className="info-item">
             <span>玩家数量:</span>
-            <strong>{room.players.length}/{room.maxPlayers}</strong>
+            <strong>{room.players.length}/{targetPlayerCount}</strong>
           </div>
           <div className="info-item">
             <span>游戏状态:</span>
@@ -309,6 +447,7 @@ export const AvalonRoom: React.FC = () => {
             })}
           </div>
         </div>
+        </div>
       </div>
 
       {/* Actions */}
@@ -331,6 +470,7 @@ export const AvalonRoom: React.FC = () => {
               !allReady ? '等待所有玩家准备' :
               room.players.length < 6 ? '至少需要6名玩家' :
               room.players.length > 10 ? '最多10名玩家' :
+              room.players.length !== targetPlayerCount ? `需要${targetPlayerCount}名玩家` :
               '开始游戏'
             }
           >
@@ -338,6 +478,9 @@ export const AvalonRoom: React.FC = () => {
           </button>
         )}
       </div>
+
+      {/* Help Modal */}
+      <AvalonHelp isOpen={showHelp} onClose={() => setShowHelp(false)} />
     </div>
   );
 };

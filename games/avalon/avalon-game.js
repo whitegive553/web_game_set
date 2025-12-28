@@ -1,0 +1,527 @@
+"use strict";
+/**
+ * Avalon Game Logic
+ * Server-authoritative game state management
+ */
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AvalonGame = void 0;
+const shared_1 = require("@survival-game/shared");
+const config_json_1 = __importDefault(require("./config.json"));
+class AvalonGame {
+    /**
+     * @param match - The game match
+     * @param customConfig - Optional custom role configuration (overrides default config.json)
+     */
+    constructor(match, customConfig) {
+        this.events = [];
+        this.match = match;
+        const playerCount = match.players.length;
+        // Use custom config if provided, otherwise fall back to config.json
+        if (customConfig) {
+            console.log(`[AvalonGame] Using custom configuration for ${playerCount} players:`, customConfig);
+            const playerConfig = (0, shared_1.roleConfigToPlayerCountConfig)(customConfig.targetPlayerCount, customConfig.roleConfig);
+            if (!playerConfig) {
+                throw new Error('Invalid custom configuration');
+            }
+            this.config = playerConfig;
+        }
+        else {
+            // Fall back to config.json (backward compatibility)
+            const configKey = playerCount.toString();
+            if (!config_json_1.default.playerConfigs[configKey]) {
+                throw new Error(`Invalid player count: ${playerCount}`);
+            }
+            this.config = config_json_1.default.playerConfigs[configKey];
+        }
+        // Try to restore state from match if it exists
+        if (match.state && match.state.roleAssignments) {
+            console.log('[AvalonGame] Restoring game state from match');
+            this.state = match.state;
+            // Ensure compatibility with old saved states
+            if (!this.state.currentQuestTeamVotes) {
+                console.log('[AvalonGame] Adding missing currentQuestTeamVotes to restored state');
+                this.state.currentQuestTeamVotes = [];
+            }
+            // Fix old quest results that don't have teamVoteHistory
+            if (this.state.questResults) {
+                this.state.questResults.forEach((result, index) => {
+                    if (!result.teamVoteHistory) {
+                        console.log(`[AvalonGame] Adding missing teamVoteHistory to quest ${index + 1}`);
+                        result.teamVoteHistory = [];
+                    }
+                });
+            }
+        }
+        else {
+            console.log('[AvalonGame] Initializing new game state');
+            this.state = this.initializeState();
+        }
+    }
+    // ============================================================================
+    // Initialization
+    // ============================================================================
+    initializeState() {
+        // Randomize first leader instead of always using first player
+        const randomLeaderIndex = Math.floor(Math.random() * this.match.players.length);
+        console.log(`[AvalonGame] Initializing new game - Random first leader index: ${randomLeaderIndex} (player: ${this.match.players[randomLeaderIndex].username})`);
+        return {
+            phase: shared_1.AvalonPhase.LOBBY,
+            round: 0,
+            leader: this.match.players[randomLeaderIndex].userId,
+            leaderIndex: randomLeaderIndex,
+            questResults: [],
+            goodWins: 0,
+            evilWins: 0,
+            nominatedTeam: [],
+            teamVotes: {},
+            questVotes: {},
+            currentQuestTeamVotes: [],
+            roleAssignments: {},
+        };
+    }
+    /**
+     * Sync current game state to match object for persistence
+     */
+    syncStateToMatch() {
+        this.match.state = this.state;
+    }
+    // ============================================================================
+    // Game Flow
+    // ============================================================================
+    startGame() {
+        if (this.state.phase !== shared_1.AvalonPhase.LOBBY) {
+            throw new Error('Game already started');
+        }
+        // Re-initialize state to ensure clean start with random leader
+        // This fixes issues with restored game state from persistence
+        console.log('[AvalonGame] Starting new game - resetting state');
+        this.state = this.initializeState();
+        // Assign roles
+        this.assignRoles();
+        // Move to role reveal phase
+        this.state.phase = shared_1.AvalonPhase.ROLE_REVEAL;
+        const event = {
+            eventId: `event_${Date.now()}`,
+            matchId: this.match.matchId,
+            gameId: 'avalon',
+            timestamp: Date.now(),
+            type: 'GAME_STARTED',
+            payload: { phase: shared_1.AvalonPhase.ROLE_REVEAL },
+            visibleTo: 'all',
+        };
+        this.events.push(event);
+        // Sync state to match for persistence
+        this.syncStateToMatch();
+        // Automatically move to nomination after players have seen their roles
+        // Changed from 3 seconds to 8 seconds to allow for 5-second countdown + role reveal
+        setTimeout(() => this.startNomination(true), 8000); // Start first quest (round 1)
+        return [event];
+    }
+    assignRoles() {
+        const players = [...this.match.players];
+        const shuffled = this.shuffleArray(players);
+        const goodRoles = this.config.roles.good;
+        const evilRoles = this.config.roles.evil;
+        const allRoles = [...goodRoles, ...evilRoles];
+        shuffled.forEach((player, index) => {
+            this.state.roleAssignments[player.userId] = allRoles[index];
+        });
+    }
+    /**
+     * Start nomination phase
+     * @param incrementRound - Whether to increment the round (new quest) or stay on same quest (team vote failed)
+     */
+    startNomination(incrementRound = true) {
+        this.state.phase = shared_1.AvalonPhase.NOMINATION;
+        // Only increment round when starting a new quest, not when team vote fails
+        if (incrementRound) {
+            this.state.round++;
+        }
+        this.state.nominatedTeam = [];
+        const event = {
+            eventId: `event_${Date.now()}`,
+            matchId: this.match.matchId,
+            gameId: 'avalon',
+            timestamp: Date.now(),
+            type: 'NOMINATION_STARTED',
+            payload: {
+                round: this.state.round,
+                leader: this.state.leader,
+                teamSize: this.getCurrentQuestConfig().teamSize,
+            },
+            visibleTo: 'all',
+        };
+        this.events.push(event);
+        this.syncStateToMatch();
+        return [event];
+    }
+    // ============================================================================
+    // Actions
+    // ============================================================================
+    handleNominateTeam(userId, teamUserIds) {
+        // Validate
+        if (this.state.phase !== shared_1.AvalonPhase.NOMINATION) {
+            throw new Error('Not in nomination phase');
+        }
+        if (userId !== this.state.leader) {
+            throw new Error('Only leader can nominate');
+        }
+        const questConfig = this.getCurrentQuestConfig();
+        if (teamUserIds.length !== questConfig.teamSize) {
+            throw new Error(`Team must have ${questConfig.teamSize} members`);
+        }
+        // Check all nominated players exist
+        const playerIds = this.match.players.map(p => p.userId);
+        if (!teamUserIds.every(id => playerIds.includes(id))) {
+            throw new Error('Invalid player in team');
+        }
+        // Update state
+        this.state.nominatedTeam = teamUserIds;
+        this.state.phase = shared_1.AvalonPhase.TEAM_VOTE;
+        this.state.teamVotes = {};
+        const event = {
+            eventId: `event_${Date.now()}`,
+            matchId: this.match.matchId,
+            gameId: 'avalon',
+            timestamp: Date.now(),
+            type: 'TEAM_NOMINATED',
+            payload: {
+                leader: userId,
+                team: teamUserIds,
+            },
+            visibleTo: 'all',
+        };
+        this.events.push(event);
+        this.syncStateToMatch();
+        return [event];
+    }
+    handleVoteTeam(userId, approve) {
+        if (this.state.phase !== shared_1.AvalonPhase.TEAM_VOTE) {
+            throw new Error('Not in team vote phase');
+        }
+        if (this.state.teamVotes[userId] !== undefined) {
+            throw new Error('Already voted');
+        }
+        this.state.teamVotes[userId] = approve;
+        const events = [{
+                eventId: `event_${Date.now()}`,
+                matchId: this.match.matchId,
+                gameId: 'avalon',
+                timestamp: Date.now(),
+                type: 'TEAM_VOTE_CAST',
+                payload: { userId },
+                visibleTo: 'all',
+            }];
+        // Check if all voted
+        if (Object.keys(this.state.teamVotes).length === this.match.players.length) {
+            const approveCount = Object.values(this.state.teamVotes).filter(v => v).length;
+            const majority = approveCount > this.match.players.length / 2;
+            // Record team vote history
+            const approvals = [];
+            const rejections = [];
+            for (const [userId, vote] of Object.entries(this.state.teamVotes)) {
+                if (vote) {
+                    approvals.push(userId);
+                }
+                else {
+                    rejections.push(userId);
+                }
+            }
+            this.state.currentQuestTeamVotes.push({
+                nominatedTeam: [...this.state.nominatedTeam],
+                approvals,
+                rejections,
+                passed: majority,
+            });
+            events.push({
+                eventId: `event_${Date.now() + 1}`,
+                matchId: this.match.matchId,
+                gameId: 'avalon',
+                timestamp: Date.now(),
+                type: 'TEAM_VOTE_RESULT',
+                payload: {
+                    votes: this.state.teamVotes,
+                    approved: majority,
+                },
+                visibleTo: 'all',
+            });
+            if (majority) {
+                // Team approved, move to quest
+                this.state.phase = shared_1.AvalonPhase.QUEST_VOTE;
+                this.state.questVotes = {};
+                events.push({
+                    eventId: `event_${Date.now() + 2}`,
+                    matchId: this.match.matchId,
+                    gameId: 'avalon',
+                    timestamp: Date.now(),
+                    type: 'QUEST_STARTED',
+                    payload: { team: this.state.nominatedTeam },
+                    visibleTo: 'all',
+                });
+            }
+            else {
+                // Team rejected, next leader (stay on same quest round)
+                this.advanceLeader();
+                this.syncStateToMatch();
+                return events.concat(this.startNomination(false)); // Don't increment round
+            }
+        }
+        this.events.push(...events);
+        this.syncStateToMatch();
+        return events;
+    }
+    handleVoteQuest(userId, success) {
+        if (this.state.phase !== shared_1.AvalonPhase.QUEST_VOTE) {
+            throw new Error('Not in quest vote phase');
+        }
+        if (!this.state.nominatedTeam.includes(userId)) {
+            throw new Error('Not on the quest team');
+        }
+        if (this.state.questVotes[userId] !== undefined) {
+            throw new Error('Already voted');
+        }
+        // Good players can only vote success
+        const role = this.state.roleAssignments[userId];
+        const team = this.getRoleTeam(role);
+        if (team === shared_1.AvalonTeam.GOOD && !success) {
+            throw new Error('Good players must vote success');
+        }
+        this.state.questVotes[userId] = success;
+        const events = [{
+                eventId: `event_${Date.now()}`,
+                matchId: this.match.matchId,
+                gameId: 'avalon',
+                timestamp: Date.now(),
+                type: 'QUEST_VOTE_CAST',
+                payload: { userId },
+                visibleTo: 'all',
+            }];
+        // Check if all team members voted
+        if (Object.keys(this.state.questVotes).length === this.state.nominatedTeam.length) {
+            const successVotes = Object.values(this.state.questVotes).filter(v => v).length;
+            const failVotes = Object.values(this.state.questVotes).filter(v => !v).length;
+            const questConfig = this.getCurrentQuestConfig();
+            const questSuccess = failVotes < questConfig.failsRequired;
+            const result = {
+                questNumber: this.state.round,
+                team: this.state.nominatedTeam,
+                successVotes,
+                failVotes,
+                success: questSuccess,
+                teamVoteHistory: [...this.state.currentQuestTeamVotes],
+            };
+            this.state.questResults.push(result);
+            // Clear team vote history for next quest
+            this.state.currentQuestTeamVotes = [];
+            if (questSuccess) {
+                this.state.goodWins++;
+            }
+            else {
+                this.state.evilWins++;
+            }
+            this.state.phase = shared_1.AvalonPhase.QUEST_RESULT;
+            events.push({
+                eventId: `event_${Date.now() + 1}`,
+                matchId: this.match.matchId,
+                gameId: 'avalon',
+                timestamp: Date.now(),
+                type: 'QUEST_RESULT',
+                payload: result,
+                visibleTo: 'all',
+            });
+            // Check win conditions
+            if (this.state.goodWins >= 3) {
+                // Good needs to survive assassination
+                this.syncStateToMatch();
+                return events.concat(this.startAssassination());
+            }
+            else if (this.state.evilWins >= 3) {
+                // Evil wins
+                this.syncStateToMatch();
+                return events.concat(this.endGame(shared_1.AvalonTeam.EVIL, 'Three quests failed'));
+            }
+            else {
+                // Continue to next quest
+                this.advanceLeader();
+                this.syncStateToMatch();
+                setTimeout(() => this.startNomination(true), 2000); // Start next quest
+            }
+        }
+        this.events.push(...events);
+        this.syncStateToMatch();
+        return events;
+    }
+    handleAssassinate(userId, targetUserId) {
+        if (this.state.phase !== shared_1.AvalonPhase.ASSASSINATION) {
+            throw new Error('Not in assassination phase');
+        }
+        const role = this.state.roleAssignments[userId];
+        if (role !== shared_1.AvalonRole.ASSASSIN) {
+            throw new Error('Only assassin can assassinate');
+        }
+        const targetRole = this.state.roleAssignments[targetUserId];
+        const hitMerlin = targetRole === shared_1.AvalonRole.MERLIN;
+        this.state.assassinTarget = targetUserId;
+        const events = [{
+                eventId: `event_${Date.now()}`,
+                matchId: this.match.matchId,
+                gameId: 'avalon',
+                timestamp: Date.now(),
+                type: 'ASSASSINATION',
+                payload: {
+                    assassin: userId,
+                    target: targetUserId,
+                    hitMerlin,
+                },
+                visibleTo: 'all',
+            }];
+        if (hitMerlin) {
+            return events.concat(this.endGame(shared_1.AvalonTeam.EVIL, 'Merlin assassinated'));
+        }
+        else {
+            return events.concat(this.endGame(shared_1.AvalonTeam.GOOD, 'Merlin survived'));
+        }
+    }
+    startAssassination() {
+        this.state.phase = shared_1.AvalonPhase.ASSASSINATION;
+        const event = {
+            eventId: `event_${Date.now()}`,
+            matchId: this.match.matchId,
+            gameId: 'avalon',
+            timestamp: Date.now(),
+            type: 'ASSASSINATION_STARTED',
+            payload: {},
+            visibleTo: 'all',
+        };
+        this.events.push(event);
+        this.syncStateToMatch();
+        return [event];
+    }
+    endGame(winner, reason) {
+        this.state.phase = shared_1.AvalonPhase.GAME_OVER;
+        this.state.winner = winner;
+        const event = {
+            eventId: `event_${Date.now()}`,
+            matchId: this.match.matchId,
+            gameId: 'avalon',
+            timestamp: Date.now(),
+            type: 'GAME_OVER',
+            payload: {
+                winner,
+                reason,
+                roleAssignments: this.state.roleAssignments,
+            },
+            visibleTo: 'all',
+        };
+        this.events.push(event);
+        this.match.endedAt = Date.now();
+        // Sync final state to match
+        this.syncStateToMatch();
+        return [event];
+    }
+    // ============================================================================
+    // State Views
+    // ============================================================================
+    getPublicState() {
+        const questVoteCount = this.state.phase === shared_1.AvalonPhase.QUEST_VOTE || this.state.phase === shared_1.AvalonPhase.QUEST_RESULT
+            ? {
+                success: Object.values(this.state.questVotes).filter(v => v).length,
+                fail: Object.values(this.state.questVotes).filter(v => !v).length,
+            }
+            : undefined;
+        return {
+            phase: this.state.phase,
+            round: this.state.round,
+            leader: this.state.leader,
+            questResults: this.state.questResults,
+            goodWins: this.state.goodWins,
+            evilWins: this.state.evilWins,
+            nominatedTeam: this.state.nominatedTeam.length > 0 ? this.state.nominatedTeam : undefined,
+            teamVotes: Object.keys(this.state.teamVotes).length > 0 ? this.state.teamVotes : undefined,
+            questVoteCount,
+            winner: this.state.winner,
+        };
+    }
+    getPrivateState(userId) {
+        const role = this.state.roleAssignments[userId];
+        const team = this.getRoleTeam(role);
+        const privateState = {
+            userId,
+            role,
+            team,
+        };
+        // ========================================================================
+        // Vision Rules Implementation (按图示标准)
+        // ========================================================================
+        // Merlin: Sees all evil players EXCEPT Mordred
+        if (role === shared_1.AvalonRole.MERLIN) {
+            privateState.evilPlayers = Object.entries(this.state.roleAssignments)
+                .filter(([_, r]) => {
+                // See all evil except Mordred
+                return this.getRoleTeam(r) === shared_1.AvalonTeam.EVIL && r !== shared_1.AvalonRole.MORDRED;
+            })
+                .map(([uid, _]) => uid);
+        }
+        // Percival: Sees Merlin and Morgana (cannot distinguish)
+        if (role === shared_1.AvalonRole.PERCIVAL) {
+            privateState.merlinCandidates = Object.entries(this.state.roleAssignments)
+                .filter(([_, r]) => r === shared_1.AvalonRole.MERLIN || r === shared_1.AvalonRole.MORGANA)
+                .map(([uid, _]) => uid);
+        }
+        // Evil team (except Oberon): Can see each other, but NOT Oberon
+        // Includes: Assassin, Morgana, Mordred, Minion (但看不到Oberon)
+        if (team === shared_1.AvalonTeam.EVIL && role !== shared_1.AvalonRole.OBERON) {
+            privateState.knownEvil = Object.entries(this.state.roleAssignments)
+                .filter(([uid, r]) => {
+                // Don't include self
+                if (uid === userId)
+                    return false;
+                // See all evil teammates except Oberon
+                return this.getRoleTeam(r) === shared_1.AvalonTeam.EVIL && r !== shared_1.AvalonRole.OBERON;
+            })
+                .map(([uid, _]) => uid);
+        }
+        // Oberon: Sees no one (knows team but not teammates)
+        // Oberon gets no special vision - knownEvil remains undefined
+        // Check if player has voted in current quest
+        if (this.state.phase === shared_1.AvalonPhase.QUEST_VOTE) {
+            privateState.hasVotedQuest = this.state.questVotes[userId] !== undefined;
+        }
+        return privateState;
+    }
+    getEvents() {
+        return this.events;
+    }
+    // ============================================================================
+    // Helpers
+    // ============================================================================
+    getCurrentQuestConfig() {
+        return this.config.quests[this.state.round - 1];
+    }
+    advanceLeader() {
+        this.state.leaderIndex = (this.state.leaderIndex + 1) % this.match.players.length;
+        this.state.leader = this.match.players[this.state.leaderIndex].userId;
+    }
+    getRoleTeam(role) {
+        if (role === shared_1.AvalonRole.ASSASSIN ||
+            role === shared_1.AvalonRole.MORGANA ||
+            role === shared_1.AvalonRole.MORDRED ||
+            role === shared_1.AvalonRole.OBERON ||
+            role === shared_1.AvalonRole.MINION) {
+            return shared_1.AvalonTeam.EVIL;
+        }
+        return shared_1.AvalonTeam.GOOD;
+    }
+    shuffleArray(array) {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+}
+exports.AvalonGame = AvalonGame;

@@ -7,13 +7,156 @@ import { Router, Request, Response } from 'express';
 import { requireAuth } from '../middleware/auth';
 import { getRoomManager } from '../services/room-manager';
 import { getWebSocketService } from '../services/websocket-service';
-import { GameMatch, PluginGamePlayer } from '@survival-game/shared';
+import {
+  GameMatch,
+  PluginGamePlayer,
+  validateRoleConfiguration,
+  getDefaultRoomConfig,
+  roleConfigToPlayerCountConfig
+} from '@survival-game/shared';
 import { AvalonGame } from '../../../../games/avalon/avalon-game';
 
 const router = Router();
 
 // In-memory game instances (in production, use Redis or similar)
 const activeGames = new Map<string, any>();
+
+/**
+ * POST /api/avalon/:roomId/config
+ * Update room configuration (host only, lobby only)
+ */
+router.post('/:roomId/config', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { roomId } = req.params;
+    const userId = req.user!.id;
+    const { targetPlayerCount, roleConfig } = req.body;
+
+    const roomManager = getRoomManager();
+    const room = roomManager.getRoom(roomId);
+
+    if (!room) {
+      res.status(404).json({
+        success: false,
+        error: 'Room not found'
+      });
+      return;
+    }
+
+    if (room.gameId !== 'avalon') {
+      res.status(400).json({
+        success: false,
+        error: 'This room is not for Avalon game'
+      });
+      return;
+    }
+
+    if (room.hostUserId !== userId) {
+      res.status(403).json({
+        success: false,
+        error: 'Only the host can update configuration'
+      });
+      return;
+    }
+
+    if (room.status !== 'lobby') {
+      res.status(400).json({
+        success: false,
+        error: 'Cannot update configuration after game has started'
+      });
+      return;
+    }
+
+    // Get current config or default
+    let currentConfig = room.avalonConfig;
+    if (!currentConfig) {
+      const defaultConfig = getDefaultRoomConfig(room.maxPlayers);
+      if (!defaultConfig) {
+        res.status(400).json({
+          success: false,
+          error: `Invalid player count: ${room.maxPlayers}. Must be 6-10.`
+        });
+        return;
+      }
+      currentConfig = defaultConfig;
+    }
+
+    // Update target player count if provided
+    if (targetPlayerCount !== undefined) {
+      if (targetPlayerCount < 6 || targetPlayerCount > 10) {
+        res.status(400).json({
+          success: false,
+          error: 'Player count must be between 6 and 10'
+        });
+        return;
+      }
+
+      if (targetPlayerCount < room.players.length) {
+        res.status(400).json({
+          success: false,
+          error: `Target player count (${targetPlayerCount}) cannot be less than current player count (${room.players.length})`
+        });
+        return;
+      }
+
+      currentConfig.targetPlayerCount = targetPlayerCount;
+
+      // If only changing player count, use default role config for new count
+      if (!roleConfig) {
+        const newDefaultConfig = getDefaultRoomConfig(targetPlayerCount);
+        if (newDefaultConfig) {
+          currentConfig.roleConfig = newDefaultConfig.roleConfig;
+        }
+      }
+    }
+
+    // Update role config if provided
+    if (roleConfig) {
+      const playerCount = currentConfig.targetPlayerCount;
+
+      // Validate the role configuration
+      const validation = validateRoleConfiguration(playerCount, roleConfig);
+
+      if (!validation.valid) {
+        res.status(400).json({
+          success: false,
+          error: 'Invalid role configuration',
+          details: validation.errors
+        });
+        return;
+      }
+
+      currentConfig.roleConfig = roleConfig;
+    }
+
+    // Update the room
+    await roomManager.updateAvalonConfig(roomId, userId, currentConfig);
+
+    // Broadcast config update to all players in room
+    const wsService = getWebSocketService();
+    wsService.broadcastToRoom(roomId, {
+      type: 'ROOM_CONFIG_UPDATED',
+      payload: {
+        avalonConfig: currentConfig,
+        maxPlayers: currentConfig.targetPlayerCount
+      }
+    });
+
+    console.log(`[Avalon] Room ${roomId} config updated by ${userId}:`, currentConfig);
+
+    res.json({
+      success: true,
+      data: {
+        avalonConfig: currentConfig
+      }
+    });
+  } catch (error) {
+    console.error('[Avalon] Update config error:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to update configuration'
+    });
+  }
+});
 
 /**
  * POST /api/avalon/:roomId/start
@@ -78,6 +221,43 @@ router.post('/:roomId/start', requireAuth, async (req: Request, res: Response) =
       return;
     }
 
+    // Get or create default Avalon config
+    let avalonConfig = room.avalonConfig;
+    if (!avalonConfig) {
+      const defaultConfig = getDefaultRoomConfig(room.players.length);
+      if (!defaultConfig) {
+        res.status(400).json({
+          success: false,
+          error: `Cannot create default configuration for ${room.players.length} players`
+        });
+        return;
+      }
+      avalonConfig = defaultConfig;
+    }
+
+    // Validate configuration matches actual player count
+    if (avalonConfig.targetPlayerCount !== room.players.length) {
+      res.status(400).json({
+        success: false,
+        error: `Configuration mismatch: expected ${avalonConfig.targetPlayerCount} players, got ${room.players.length}`
+      });
+      return;
+    }
+
+    // Validate role configuration
+    const validation = validateRoleConfiguration(
+      room.players.length,
+      avalonConfig.roleConfig
+    );
+    if (!validation.valid) {
+      res.status(400).json({
+        success: false,
+        error: 'Invalid role configuration',
+        details: validation.errors
+      });
+      return;
+    }
+
     // Create game match
     const matchId = `match_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const match: GameMatch = {
@@ -94,9 +274,11 @@ router.post('/:roomId/start', requireAuth, async (req: Request, res: Response) =
       createdAt: Date.now()
     };
 
-    // Initialize game instance
-    const avalonGame = new AvalonGame(match);
+    // Initialize game instance with custom config
+    const avalonGame = new AvalonGame(match, avalonConfig);
     activeGames.set(matchId, avalonGame);
+
+    console.log(`[Avalon] Starting game with config:`, avalonConfig);
 
     // Update room status
     await roomManager.startGame(roomId, match);

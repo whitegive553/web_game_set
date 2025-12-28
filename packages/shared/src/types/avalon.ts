@@ -12,21 +12,26 @@ export enum AvalonTeam {
 }
 
 export enum AvalonRole {
-  MERLIN = 'merlin',       // Good: Knows all evil players
+  MERLIN = 'merlin',       // Good: Knows all evil players except Mordred
   PERCIVAL = 'percival',   // Good: Sees Merlin/Morgana candidates
   LOYAL_SERVANT = 'loyal_servant', // Good: No special ability
   ASSASSIN = 'assassin',   // Evil: Can assassinate Merlin
   MORGANA = 'morgana',     // Evil: Appears as Merlin to Percival
+  MORDRED = 'mordred',     // Evil: Hidden from Merlin, visible to evil
+  OBERON = 'oberon',       // Evil: Hidden from evil, doesn't see evil
   MINION = 'minion',       // Evil: No special ability
 }
 
 export interface RoleInfo {
   role: AvalonRole;
   team: AvalonTeam;
-  seesEvilPlayers?: boolean;    // Merlin
+  seesEvilPlayers?: boolean;    // Merlin (except Mordred)
   seesMerlinCandidates?: boolean; // Percival
   canAssassinate?: boolean;     // Assassin
   appearsAsMerlin?: boolean;    // Morgana
+  hiddenFromMerlin?: boolean;   // Mordred
+  hiddenFromEvil?: boolean;     // Oberon
+  cannotSeeEvil?: boolean;      // Oberon
 }
 
 // ============================================================================
@@ -63,6 +68,36 @@ export interface PlayerCountConfig {
     evil: string[];
   };
   quests: QuestConfig[];
+}
+
+// Room configuration for Avalon games (customizable by host in lobby)
+export interface AvalonRoomConfig {
+  targetPlayerCount: number;    // Target number of players (6-10)
+  roleConfig: RoleConfiguration; // Which roles are enabled
+}
+
+// Role configuration defining which roles and how many
+export interface RoleConfiguration {
+  // Good roles
+  merlin: number;           // 0 or 1
+  percival: number;         // 0 or 1
+  loyalServant: number;     // Variable to fill good side
+
+  // Evil roles
+  assassin: number;         // 0 or 1
+  morgana: number;          // 0 or 1
+  mordred: number;          // 0 or 1
+  oberon: number;           // 0 or 1
+  minion: number;           // Variable to fill evil side
+}
+
+// Validation result for role configurations
+export interface RoleConfigValidation {
+  valid: boolean;
+  errors: string[];
+  totalRoles?: number;
+  goodCount?: number;
+  evilCount?: number;
 }
 
 // ============================================================================
@@ -121,8 +156,13 @@ export interface QuestResult {
 // ============================================================================
 
 export interface AvalonAction {
-  type: 'READY' | 'START' | 'NOMINATE_TEAM' | 'VOTE_TEAM' | 'VOTE_QUEST' | 'ASSASSINATE';
+  type: 'READY' | 'START' | 'NOMINATE_TEAM' | 'VOTE_TEAM' | 'VOTE_QUEST' | 'ASSASSINATE' | 'UPDATE_CONFIG';
   payload?: any;
+}
+
+export interface UpdateConfigPayload {
+  targetPlayerCount?: number;
+  roleConfig?: RoleConfiguration;
 }
 
 export interface NominateTeamPayload {
@@ -150,9 +190,10 @@ export interface AvalonPrivateState {
   role: AvalonRole;
   team: AvalonTeam;
 
-  // Role-specific information
-  evilPlayers?: string[];     // For Merlin
+  // Role-specific vision information
+  evilPlayers?: string[];     // For Merlin (all evil except Mordred)
   merlinCandidates?: string[]; // For Percival (Merlin + Morgana)
+  knownEvil?: string[];       // For evil players (all evil except Oberon)
 
   // Voting status
   hasVotedQuest?: boolean;    // Whether player has voted in current quest

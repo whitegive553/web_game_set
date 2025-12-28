@@ -109,23 +109,49 @@
   border-color: #c46a6a;
 }
 
+.menu-button.disabled {
+  background: rgba(60, 60, 60, 0.3);
+  border-color: #555;
+  color: #888;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.menu-button.disabled:hover {
+  background: rgba(60, 60, 60, 0.3);
+  border-color: #555;
+  transform: none;
+  box-shadow: none;
+}
+
 .button-icon {
   font-size: 1.4rem;
   min-width: 24px;
   text-align: center;
 }
 
-.version-info {
+.footer-info {
   text-align: center;
   padding-top: 20px;
   border-top: 1px solid #2a3f5f;
 }
 
-.version-info p {
-  font-size: 0.85rem;
-  color: #666;
+.footer-info p {
+  font-size: 0.9rem;
+  color: #888;
   margin: 0;
-  font-family: monospace;
+  line-height: 1.6;
+}
+
+.footer-info a {
+  color: #4a9eff;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.footer-info a:hover {
+  color: #6bb0ff;
+  text-decoration: underline;
 }
 
 /* Responsive */

@@ -19,6 +19,9 @@ import {
   PublicStateView,
   PrivateStateView,
   ValidationResult,
+  AvalonRoomConfig,
+  roleConfigToPlayerCountConfig,
+  getPlayerCountConfig
 } from '@survival-game/shared';
 import gameConfig from './config.json';
 
@@ -28,16 +31,36 @@ export class AvalonGame {
   private config: PlayerCountConfig;
   private events: PluginGameEvent[] = [];
 
-  constructor(match: GameMatch) {
+  /**
+   * @param match - The game match
+   * @param customConfig - Optional custom role configuration (overrides default config.json)
+   */
+  constructor(match: GameMatch, customConfig?: AvalonRoomConfig) {
     this.match = match;
     const playerCount = match.players.length;
 
-    const configKey = playerCount.toString() as keyof typeof gameConfig.playerConfigs;
-    if (!gameConfig.playerConfigs[configKey]) {
-      throw new Error(`Invalid player count: ${playerCount}`);
-    }
+    // Use custom config if provided, otherwise fall back to config.json
+    if (customConfig) {
+      console.log(`[AvalonGame] Using custom configuration for ${playerCount} players:`, customConfig);
+      const playerConfig = roleConfigToPlayerCountConfig(
+        customConfig.targetPlayerCount,
+        customConfig.roleConfig
+      );
 
-    this.config = gameConfig.playerConfigs[configKey] as PlayerCountConfig;
+      if (!playerConfig) {
+        throw new Error('Invalid custom configuration');
+      }
+
+      this.config = playerConfig;
+    } else {
+      // Fall back to config.json (backward compatibility)
+      const configKey = playerCount.toString() as keyof typeof gameConfig.playerConfigs;
+      if (!gameConfig.playerConfigs[configKey]) {
+        throw new Error(`Invalid player count: ${playerCount}`);
+      }
+
+      this.config = gameConfig.playerConfigs[configKey] as PlayerCountConfig;
+    }
 
     // Try to restore state from match if it exists
     if (match.state && (match.state as any).roleAssignments) {
@@ -530,19 +553,42 @@ export class AvalonGame {
       team,
     };
 
-    // Merlin sees all evil players
+    // ========================================================================
+    // Vision Rules Implementation (按图示标准)
+    // ========================================================================
+
+    // Merlin: Sees all evil players EXCEPT Mordred
     if (role === AvalonRole.MERLIN) {
       privateState.evilPlayers = Object.entries(this.state.roleAssignments)
-        .filter(([_, r]) => this.getRoleTeam(r) === AvalonTeam.EVIL)
+        .filter(([_, r]) => {
+          // See all evil except Mordred
+          return this.getRoleTeam(r) === AvalonTeam.EVIL && r !== AvalonRole.MORDRED;
+        })
         .map(([uid, _]) => uid);
     }
 
-    // Percival sees Merlin and Morgana (cannot distinguish)
+    // Percival: Sees Merlin and Morgana (cannot distinguish)
     if (role === AvalonRole.PERCIVAL) {
       privateState.merlinCandidates = Object.entries(this.state.roleAssignments)
         .filter(([_, r]) => r === AvalonRole.MERLIN || r === AvalonRole.MORGANA)
         .map(([uid, _]) => uid);
     }
+
+    // Evil team (except Oberon): Can see each other, but NOT Oberon
+    // Includes: Assassin, Morgana, Mordred, Minion (但看不到Oberon)
+    if (team === AvalonTeam.EVIL && role !== AvalonRole.OBERON) {
+      privateState.knownEvil = Object.entries(this.state.roleAssignments)
+        .filter(([uid, r]) => {
+          // Don't include self
+          if (uid === userId) return false;
+          // See all evil teammates except Oberon
+          return this.getRoleTeam(r) === AvalonTeam.EVIL && r !== AvalonRole.OBERON;
+        })
+        .map(([uid, _]) => uid);
+    }
+
+    // Oberon: Sees no one (knows team but not teammates)
+    // Oberon gets no special vision - knownEvil remains undefined
 
     // Check if player has voted in current quest
     if (this.state.phase === AvalonPhase.QUEST_VOTE) {
@@ -570,7 +616,13 @@ export class AvalonGame {
   }
 
   private getRoleTeam(role: AvalonRole): AvalonTeam {
-    if (role === AvalonRole.ASSASSIN || role === AvalonRole.MORGANA || role === AvalonRole.MINION) {
+    if (
+      role === AvalonRole.ASSASSIN ||
+      role === AvalonRole.MORGANA ||
+      role === AvalonRole.MORDRED ||
+      role === AvalonRole.OBERON ||
+      role === AvalonRole.MINION
+    ) {
       return AvalonTeam.EVIL;
     }
     return AvalonTeam.GOOD;

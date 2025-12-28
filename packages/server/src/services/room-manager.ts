@@ -4,7 +4,7 @@
  */
 
 import path from 'path';
-import { GameMatch, PluginGamePlayer } from '@survival-game/shared';
+import { GameMatch, PluginGamePlayer, AvalonRoomConfig } from '@survival-game/shared';
 import { JsonStore } from '../utils/JsonStore';
 
 export interface Room {
@@ -21,6 +21,9 @@ export interface Room {
   // Track original players when game starts (for reconnection control)
   originalPlayers?: string[];  // userIds of players when game started
   gameStartedAt?: number;      // Timestamp when game started (for auto-cleanup)
+
+  // Game-specific configuration (e.g., Avalon role config)
+  avalonConfig?: AvalonRoomConfig;
 }
 
 interface RoomsData {
@@ -270,6 +273,45 @@ class RoomManager {
   async deleteRoom(roomId: string): Promise<void> {
     this.rooms.delete(roomId);
     await this.persist();
+  }
+
+  /**
+   * Update Avalon room configuration (host only, lobby only)
+   */
+  async updateAvalonConfig(roomId: string, userId: string, config: AvalonRoomConfig): Promise<Room> {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      throw new Error('Room not found');
+    }
+
+    // Only host can update config
+    if (room.hostUserId !== userId) {
+      throw new Error('Only host can update room configuration');
+    }
+
+    // Only allow updates in lobby
+    if (room.status !== 'lobby') {
+      throw new Error('Cannot update configuration after game has started');
+    }
+
+    // Only for Avalon games
+    if (room.gameId !== 'avalon') {
+      throw new Error('Configuration updates only available for Avalon games');
+    }
+
+    // Validate target player count against current players
+    if (config.targetPlayerCount < room.players.length) {
+      throw new Error(
+        `Target player count (${config.targetPlayerCount}) cannot be less than current player count (${room.players.length})`
+      );
+    }
+
+    // Update room's maxPlayers to match target
+    room.maxPlayers = config.targetPlayerCount;
+    room.avalonConfig = config;
+
+    await this.persist();
+    return room;
   }
 
   /**

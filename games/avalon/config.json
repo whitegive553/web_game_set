@@ -56,11 +56,11 @@
     },
     "9": {
       "totalPlayers": 9,
-      "goodCount": 6,
-      "evilCount": 3,
+      "goodCount": 5,
+      "evilCount": 4,
       "roles": {
-        "good": ["merlin", "percival", "loyal_servant", "loyal_servant", "loyal_servant", "loyal_servant"],
-        "evil": ["assassin", "morgana", "minion"]
+        "good": ["merlin", "percival", "loyal_servant", "loyal_servant", "loyal_servant"],
+        "evil": ["assassin", "morgana", "mordred", "minion"]
       },
       "quests": [
         { "questNumber": 1, "teamSize": 3, "failsRequired": 1 },
@@ -76,7 +76,7 @@
       "evilCount": 4,
       "roles": {
         "good": ["merlin", "percival", "loyal_servant", "loyal_servant", "loyal_servant", "loyal_servant"],
-        "evil": ["assassin", "morgana", "minion", "minion"]
+        "evil": ["assassin", "morgana", "mordred", "minion"]
       },
       "quests": [
         { "questNumber": 1, "teamSize": 3, "failsRequired": 1 },

@@ -35,6 +35,24 @@
       "username": "test4",
       "passwordHash": "$2b$10$ifCIz/fhBi5pQpjTKjv.xO57ANNAxqiA/AEu7X.JoB3vqm7MONcOW",
       "createdAt": 1766461497362
+    },
+    {
+      "id": "f1d811c0eb076e6b1ecbe5d5e3b20e3d",
+      "username": "test5",
+      "passwordHash": "$2b$10$aIk/ZnpVfJbudHXwFWy9qexllDaAtozRTByKn1ASkO42rqItW9b/i",
+      "createdAt": 1766924519055
+    },
+    {
+      "id": "944e9e7371dab061fad843893a2f10a9",
+      "username": "test6",
+      "passwordHash": "$2b$10$eCuWJXPmEVGue3eOfhRGt.mNqkIrSVgpmBcnLl8/st8J9Q5sw8cAG",
+      "createdAt": 1766924534146
+    },
+    {
+      "id": "2928e8202c7422308821651503c8889b",
+      "username": "test7",
+      "passwordHash": "$2b$10$2HiPyrFyCfcW3YQX7w6N1ezDFQuo9CjceUBDfpJIi1DYZ7MxaXOoe",
+      "createdAt": 1766924555742
     }
   ]
 }

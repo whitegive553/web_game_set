@@ -7,6 +7,7 @@ import { Router, Request, Response } from 'express';
 import { requireAuth } from '../middleware/auth';
 import { getRoomManager } from '../services/room-manager';
 import { getWebSocketService } from '../services/websocket-service';
+import { getDefaultRoomConfig } from '@survival-game/shared';
 
 const router = Router();
 
@@ -31,14 +32,26 @@ router.post('/rooms', requireAuth, async (req: Request, res: Response) => {
     const roomManager = getRoomManager();
     const room = await roomManager.createRoom(gameId, userId, name, maxPlayers);
 
+    // Initialize default Avalon configuration if this is an Avalon game
+    if (gameId === 'avalon' && maxPlayers >= 6 && maxPlayers <= 10) {
+      const defaultConfig = getDefaultRoomConfig(maxPlayers);
+      if (defaultConfig) {
+        await roomManager.updateAvalonConfig(room.roomId, userId, defaultConfig);
+        console.log(`[Lobby] Initialized default Avalon config for ${maxPlayers} players`);
+      }
+    }
+
     // Auto-join creator as first player
     await roomManager.joinRoom(room.roomId, userId, username);
 
     console.log(`[Lobby] Room created: ${room.roomId} by ${username}`);
 
+    // Get updated room data (includes avalonConfig if set)
+    const updatedRoom = roomManager.getRoom(room.roomId);
+
     res.json({
       success: true,
-      data: room
+      data: updatedRoom || room
     });
   } catch (error) {
     console.error('[Lobby] Create room error:', error);

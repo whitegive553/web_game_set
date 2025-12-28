@@ -36,8 +36,8 @@ export const MainMenu: React.FC = () => {
     <div className="main-menu">
       <div className="main-menu-container">
         <div className="main-menu-header">
-          <h1>禁区求生</h1>
-          <p className="subtitle">Anomalous Exclusion Zone</p>
+          <h1>WG553 Game Hub</h1>
+          <p className="subtitle">Multiple Games Platform</p>
         </div>
 
         <div className="welcome-section">
@@ -46,11 +46,12 @@ export const MainMenu: React.FC = () => {
 
         <div className="menu-buttons">
           <button
-            className="menu-button primary"
+            className="menu-button primary disabled"
             onClick={handleStartGame}
+            disabled
           >
-            <span className="button-icon">▶</span>
-            单人游戏
+            <span className="button-icon">🔧</span>
+            单人游戏 (维护中)
           </button>
 
           <button
@@ -86,8 +87,17 @@ export const MainMenu: React.FC = () => {
           </button>
         </div>
 
-        <div className="version-info">
-          <p>Phase 4 Enhanced | Plot Director Active</p>
+        <div className="footer-info">
+          <p>
+            Built by whitegive553 · {' '}
+            <a href="https://whitegive553.github.io/" target="_blank" rel="noopener noreferrer">
+              About / Home
+            </a>
+            {' '} · {' '}
+            <a href="mailto:pengze.ai@mail.utoronto.ca">
+              Feedback
+            </a>
+          </p>
         </div>
       </div>
     </div>
