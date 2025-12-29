@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../store/AuthContext';
 import { getWebSocketClient } from '../../services/websocket-client';
 import { API_CONFIG } from '../../config/api';
@@ -42,6 +43,7 @@ interface PrivateState {
   role: string;
   team: string;
   evilPlayers?: string[];
+  knownEvil?: string[];
   merlinCandidates?: string[];
   hasVotedQuest?: boolean;
 }
@@ -49,6 +51,7 @@ interface PrivateState {
 export const AvalonGame: React.FC = () => {
   const { matchId } = useParams<{ matchId: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { token, user } = useAuth();
   const [publicState, setPublicState] = useState<PublicState | null>(null);
   const [privateState, setPrivateState] = useState<PrivateState | null>(null);
@@ -149,7 +152,7 @@ export const AvalonGame: React.FC = () => {
       } else if (response.status === 404 || data.gameEnded) {
         // Game not found or ended, redirect to lobby
         console.warn('[AvalonGame] Game not found or ended, redirecting to lobby');
-        setError('游戏已结束或找不到');
+        setError(t('avalonGame.gameEndedOrNotFound'));
         setTimeout(() => {
           navigate('/lobby');
         }, 2000);
@@ -221,7 +224,7 @@ export const AvalonGame: React.FC = () => {
     if (!token) return;
 
     // Confirm before exiting
-    if (!window.confirm('确定要退出游戏吗？')) {
+    if (!window.confirm(t('avalonGame.confirmExit'))) {
       return;
     }
 
@@ -274,38 +277,22 @@ export const AvalonGame: React.FC = () => {
   };
 
   const getRoleDisplayName = (role: string): string => {
-    const roleNames: Record<string, string> = {
-      'merlin': '梅林',
-      'percival': '派西维尔',
-      'loyal_servant': '忠臣',
-      'assassin': '刺客',
-      'morgana': '莫甘娜',
-      'minion': '爪牙'
-    };
-    const displayName = roleNames[role] || role;
+    const roleKey = role.replace('_', '');
+    const displayName = t(`avalonConfig.roles.${roleKey}`, { defaultValue: role });
     console.log('[AvalonGame] Role display:', role, '->', displayName);
     return displayName;
   };
 
   const getPhaseText = (phase: string): string => {
-    const phaseNames: Record<string, string> = {
-      'LOBBY': '准备中',
-      'ROLE_REVEAL': '角色揭示',
-      'NOMINATION': '队长提名',
-      'TEAM_VOTE': '队伍投票',
-      'QUEST_VOTE': '任务投票',
-      'ASSASSINATION': '刺杀梅林',
-      'QUEST_RESULT': '任务结果',
-      'GAME_OVER': '游戏结束'
-    };
-    return phaseNames[phase] || phase;
+    const phaseKey = phase.toLowerCase();
+    return t(`avalonGame.phase.${phaseKey}`, { defaultValue: phase });
   };
 
   if (!publicState || !privateState) {
     return (
       <div className="avalon-game loading">
         <div className="loading-spinner"></div>
-        <p>加载游戏中...</p>
+        <p>{t('avalonGame.loading')}</p>
       </div>
     );
   }
@@ -315,9 +302,9 @@ export const AvalonGame: React.FC = () => {
     if (countdown > 0) {
       return (
         <div className="avalon-game countdown-screen">
-          <h1>游戏即将开始</h1>
+          <h1>{t('avalonGame.gameStarting')}</h1>
           <div className="countdown-number">{countdown}</div>
-          <p>请准备查看你的角色</p>
+          <p>{t('avalonGame.prepareRole')}</p>
         </div>
       );
     }
@@ -325,7 +312,7 @@ export const AvalonGame: React.FC = () => {
     if (!showRoleReveal) {
       return (
         <div className="avalon-game loading">
-          <p>准备中...</p>
+          <p>{t('avalonGame.preparing')}</p>
         </div>
       );
     }
@@ -334,18 +321,29 @@ export const AvalonGame: React.FC = () => {
     return (
       <div className="avalon-game role-reveal-screen">
         <div className="role-reveal-content">
-          <h1>你的角色</h1>
+          <h1>{t('avalonGame.yourRole')}</h1>
           <div className={`role-reveal-card ${privateState.team}`}>
             <div className="role-name-large">{getRoleDisplayName(privateState.role)}</div>
             <div className="role-team-large">
-              {privateState.team === 'good' ? '善良阵营 ⚔️' : '邪恶阵营 ⚔️'}
+              {privateState.team === 'good' ? `${t('avalonGame.team.good')} ⚔️` : `${t('avalonGame.team.evil')} ⚔️`}
             </div>
 
             {/* Special Info */}
             {privateState.evilPlayers && privateState.evilPlayers.length > 0 && (
               <div className="role-special-info">
-                <p className="info-label">你知道的邪恶玩家：</p>
+                <p className="info-label">{t('avalonGame.roleInfo.knownEvil')}</p>
                 {privateState.evilPlayers.map(playerId => (
+                  <div key={playerId} className="info-player">
+                    {getPlayerName(playerId)}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {privateState.knownEvil && privateState.knownEvil.length > 0 && (
+              <div className="role-special-info">
+                <p className="info-label">{t('avalonGame.roleInfo.knownEvil')}</p>
+                {privateState.knownEvil.map(playerId => (
                   <div key={playerId} className="info-player">
                     {getPlayerName(playerId)}
                   </div>
@@ -355,7 +353,7 @@ export const AvalonGame: React.FC = () => {
 
             {privateState.merlinCandidates && privateState.merlinCandidates.length > 0 && (
               <div className="role-special-info">
-                <p className="info-label">可能是梅林的玩家：</p>
+                <p className="info-label">{t('avalonGame.roleInfo.merlinCandidates')}</p>
                 {privateState.merlinCandidates.map(playerId => (
                   <div key={playerId} className="info-player">
                     {getPlayerName(playerId)}
@@ -369,7 +367,7 @@ export const AvalonGame: React.FC = () => {
             className="btn-confirm-role"
             onClick={() => setRoleConfirmed(true)}
           >
-            我已确认角色，进入游戏
+            {t('avalonGame.confirmRole')}
           </button>
         </div>
       </div>
@@ -409,24 +407,24 @@ export const AvalonGame: React.FC = () => {
       {/* Header */}
       <div className="game-header">
         <div className="header-left">
-          <h1>阿瓦隆</h1>
+          <h1>{t('games.avalon.name')}</h1>
           <span className="phase-indicator">{getPhaseText(publicState.phase)}</span>
         </div>
         <div className="header-center">
           <span className="score-display">
-            善良 {publicState.goodWins} : {publicState.evilWins} 邪恶
+            {t('avalonGame.score', { good: publicState.goodWins, evil: publicState.evilWins })}
           </span>
         </div>
         <div className="header-right">
           <span className="current-user">
             <span className="user-icon">👤</span>
-            {user?.username}
+            {t('avalonGame.currentUser', { username: user?.username })}
           </span>
           <button onClick={() => setShowHelp(true)} className="btn-help-game">
-            帮助
+            {t('avalonGame.help')}
           </button>
           <button onClick={handleExitGame} className="btn-exit">
-            退出游戏
+            {t('avalonGame.exitGame')}
           </button>
         </div>
       </div>
@@ -448,23 +446,31 @@ export const AvalonGame: React.FC = () => {
             <div className="role-card-front">
               <div className="card-back-design">
                 <div className="card-icon">🃏</div>
-                <p>点击查看角色</p>
+                <p>{t('avalonGame.clickToViewRole')}</p>
               </div>
             </div>
             <div className={`role-card-back ${privateState.team}`}>
               <div className="role-name">{getRoleDisplayName(privateState.role)}</div>
-              <div className="role-team">{privateState.team === 'good' ? '善良' : '邪恶'}</div>
+              <div className="role-team">{t(`avalonGame.team.${privateState.team}`)}</div>
               {privateState.evilPlayers && privateState.evilPlayers.length > 0 && (
                 <div className="role-info-compact">
-                  <small>邪恶玩家:</small>
+                  <small>{t('avalonGame.roleInfo.knownEvil')}</small>
                   {privateState.evilPlayers.map(id => (
+                    <small key={id}>{getPlayerName(id)}</small>
+                  ))}
+                </div>
+              )}
+              {privateState.knownEvil && privateState.knownEvil.length > 0 && (
+                <div className="role-info-compact">
+                  <small>{t('avalonGame.roleInfo.knownEvil')}</small>
+                  {privateState.knownEvil.map(id => (
                     <small key={id}>{getPlayerName(id)}</small>
                   ))}
                 </div>
               )}
               {privateState.merlinCandidates && privateState.merlinCandidates.length > 0 && (
                 <div className="role-info-compact">
-                  <small>可能是梅林:</small>
+                  <small>{t('avalonGame.roleInfo.merlinCandidates')}</small>
                   {privateState.merlinCandidates.map(id => (
                     <small key={id}>{getPlayerName(id)}</small>
                   ))}
@@ -478,7 +484,7 @@ export const AvalonGame: React.FC = () => {
         <div className="game-main">
           {/* Quest Results */}
           <div className="quest-results">
-            <h3>任务进度</h3>
+            <h3>{t('avalonGame.questProgress')}</h3>
             <div className="quests-row">
               {[1, 2, 3, 4, 5].map(questNum => {
                 const result = publicState.questResults.find(q => q.questNumber === questNum);
@@ -496,19 +502,19 @@ export const AvalonGame: React.FC = () => {
 
           {/* Current Leader */}
           <div className="leader-display">
-            <span className="leader-label">当前队长：</span>
+            <span className="leader-label">{t('avalonGame.currentLeader')}</span>
             <span className="leader-name">{getPlayerName(publicState.leader)}</span>
           </div>
 
           {/* Nomination Phase */}
           {canNominate && (
             <div className="action-panel">
-              <h3>选择任务队员 ({selectedPlayers.length}/{getTeamSize()})</h3>
+              <h3>{t('avalonGame.selectTeamMembers', { selected: selectedPlayers.length, total: getTeamSize() })}</h3>
               {players.length === 0 ? (
                 <div className="loading-message">
-                  <p>正在加载玩家列表...</p>
+                  <p>{t('avalonGame.loadingPlayers')}</p>
                   <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>
-                    如果持续未显示，请刷新页面
+                    {t('avalonGame.refreshIfNeeded')}
                   </p>
                 </div>
               ) : (
@@ -531,7 +537,7 @@ export const AvalonGame: React.FC = () => {
                     onClick={nominateTeam}
                     disabled={selectedPlayers.length !== getTeamSize() || loading}
                   >
-                    {loading ? '提交中...' : '提交队伍'}
+                    {loading ? t('avalonGame.submitting') : t('avalonGame.submitTeam')}
                   </button>
                 </>
               )}
@@ -541,9 +547,9 @@ export const AvalonGame: React.FC = () => {
           {/* Team Vote Phase */}
           {canVoteTeam && publicState.nominatedTeam && (
             <div className="action-panel">
-              <h3>对提名队伍投票</h3>
+              <h3>{t('avalonGame.voteOnTeam')}</h3>
               <div className="nominated-team">
-                <p>队长 {getPlayerName(publicState.leader)} 提名了：</p>
+                <p>{t('avalonGame.leaderNominated', { leader: getPlayerName(publicState.leader) })}</p>
                 <div className="team-members">
                   {publicState.nominatedTeam.map(userId => (
                     <span key={userId} className="team-member">{getPlayerName(userId)}</span>
@@ -552,10 +558,10 @@ export const AvalonGame: React.FC = () => {
               </div>
               <div className="vote-buttons">
                 <button className="btn-approve" onClick={() => voteTeam(true)} disabled={loading}>
-                  赞成
+                  {t('avalonGame.approve')}
                 </button>
                 <button className="btn-reject" onClick={() => voteTeam(false)} disabled={loading}>
-                  反对
+                  {t('avalonGame.reject')}
                 </button>
               </div>
             </div>
@@ -564,25 +570,25 @@ export const AvalonGame: React.FC = () => {
           {/* Quest Vote Phase */}
           {canVoteQuest && (
             <div className="action-panel">
-              <h3>任务投票</h3>
-              <p>你在本次任务中，请投票：</p>
+              <h3>{t('avalonGame.questVote')}</h3>
+              <p>{t('avalonGame.youAreOnQuest')}</p>
               <div className="vote-buttons">
                 <button className="btn-success" onClick={() => voteQuest(true)} disabled={loading}>
-                  成功
+                  {t('avalonGame.success')}
                 </button>
                 <button className="btn-fail" onClick={() => voteQuest(false)} disabled={loading}>
-                  失败
+                  {t('avalonGame.fail')}
                 </button>
               </div>
-              <p className="vote-note">注意：只有邪恶阵营可以投失败</p>
+              <p className="vote-note">{t('avalonGame.evilCanFail')}</p>
             </div>
           )}
 
           {/* Assassination Phase */}
           {canAssassinate && (
             <div className="action-panel">
-              <h3>刺杀梅林</h3>
-              <p>选择你认为是梅林的玩家：</p>
+              <h3>{t('avalonGame.assassinateMerlin')}</h3>
+              <p>{t('avalonGame.selectMerlin')}</p>
               <div className="player-selection-grid">
                 {players.filter(p => p.userId !== user?.id).map(player => (
                   <button
@@ -601,18 +607,18 @@ export const AvalonGame: React.FC = () => {
           {/* Waiting State */}
           {!canNominate && !canVoteTeam && !canVoteQuest && !canAssassinate && publicState.phase !== 'GAME_OVER' && (
             <div className="waiting-panel">
-              <p>等待其他玩家行动...</p>
+              <p>{t('avalonGame.waitingForOthers')}</p>
               {publicState.phase === 'NOMINATION' && (
-                <p>队长 {getPlayerName(publicState.leader)} 正在选择队员</p>
+                <p>{t('avalonGame.leaderSelecting', { leader: getPlayerName(publicState.leader) })}</p>
               )}
               {publicState.phase === 'TEAM_VOTE' && hasVotedTeam && (
-                <p>等待其他玩家投票...</p>
+                <p>{t('avalonGame.waitingForVotes')}</p>
               )}
               {publicState.phase === 'QUEST_VOTE' && hasVotedQuest && (
-                <p>等待其他队员完成任务投票...</p>
+                <p>{t('avalonGame.waitingForQuestVotes')}</p>
               )}
               {publicState.phase === 'ASSASSINATION' && !canAssassinate && (
-                <p>刺客正在选择刺杀目标...</p>
+                <p>{t('avalonGame.assassinSelecting')}</p>
               )}
             </div>
           )}
@@ -620,12 +626,12 @@ export const AvalonGame: React.FC = () => {
           {/* Game Over */}
           {publicState.phase === 'GAME_OVER' && (
             <div className="game-over-panel">
-              <h2>{publicState.winner === 'good' ? '善良阵营获胜！' : '邪恶阵营获胜！'}</h2>
+              <h2>{publicState.winner === 'good' ? t('avalonGame.goodWins') : t('avalonGame.evilWins')}</h2>
               <div className="winner-reason">
                 {publicState.winReason && <p>{publicState.winReason}</p>}
               </div>
               <button onClick={() => navigate('/lobby')} className="btn-back-lobby">
-                返回大厅
+                {t('avalonGame.backToLobby')}
               </button>
             </div>
           )}
@@ -633,7 +639,7 @@ export const AvalonGame: React.FC = () => {
 
         {/* Players List */}
         <div className="players-panel">
-          <h3>玩家 ({players.length})</h3>
+          <h3>{t('avalonGame.players', { count: players.length })}</h3>
           <div className="players-list">
             {players.map(player => (
               <div key={player.userId} className={`player-item ${player.userId === publicState.leader ? 'leader' : ''}`}>
@@ -643,7 +649,7 @@ export const AvalonGame: React.FC = () => {
                   {publicState.nominatedTeam?.includes(player.userId) && ' ⚔️'}
                 </span>
                 <span className={`player-status ${player.connected ? 'online' : 'offline'}`}>
-                  {player.connected ? '在线' : '离线'}
+                  {player.connected ? t('avalonGame.online') : t('avalonGame.offline')}
                 </span>
               </div>
             ))}

@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../store/AuthContext';
 import { initWebSocketClient } from '../../services/websocket-client';
 import { API_CONFIG } from '../../config/api';
@@ -29,6 +30,7 @@ interface Room {
 export const GameLobby: React.FC = () => {
   const navigate = useNavigate();
   const { token, user, logout } = useAuth();
+  const { t } = useTranslation();
   const [selectedGame, setSelectedGame] = useState<'avalon' | 'text-adventure'>('avalon');
   const [rooms, setRooms] = useState<Room[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -297,11 +299,11 @@ export const GameLobby: React.FC = () => {
   return (
     <div className="game-lobby">
       <div className="lobby-header">
-        <h1>游戏大厅</h1>
+        <h1>{t('lobby.title')}</h1>
         <div className="lobby-user-info">
-          <span>欢迎, {user?.username}</span>
-          <button onClick={() => navigate('/game')} className="btn-back">返回主菜单</button>
-          <button onClick={logout} className="btn-logout">登出</button>
+          <span>{t('lobby.welcome', { username: user?.username })}</span>
+          <button onClick={() => navigate('/game')} className="btn-back">{t('lobby.backToMenu')}</button>
+          <button onClick={logout} className="btn-logout">{t('lobby.logout')}</button>
         </div>
       </div>
 
@@ -315,7 +317,7 @@ export const GameLobby: React.FC = () => {
       <div className="lobby-content">
         {/* Game Selection */}
         <div className="game-selection">
-          <h2>选择游戏</h2>
+          <h2>{t('lobby.selectGame')}</h2>
           <div className="game-cards">
             <div
               className={`game-card ${selectedGame === 'avalon' ? 'selected' : ''}`}
@@ -323,19 +325,19 @@ export const GameLobby: React.FC = () => {
               role="button"
               tabIndex={0}
             >
-              <h3>阿瓦隆</h3>
-              <p>6-10人多人游戏</p>
-              <p>角色扮演 · 推理 · 投票</p>
+              <h3>{t('games.avalon.name')}</h3>
+              <p>{t('games.avalon.description')}</p>
+              <p>{t('games.avalon.tags')}</p>
             </div>
             <div
               className="game-card disabled"
               role="button"
               tabIndex={-1}
             >
-              <h3>文字冒险</h3>
-              <p>单人游戏</p>
-              <p>叙事 · 探索 · 决策</p>
-              <div className="maintenance-badge">🔧 维护中</div>
+              <h3>{t('games.textAdventure.name')}</h3>
+              <p>{t('games.textAdventure.description')}</p>
+              <p>{t('games.textAdventure.tags')}</p>
+              <div className="maintenance-badge">🔧 {t('lobby.maintenance')}</div>
             </div>
           </div>
         </div>
@@ -343,19 +345,19 @@ export const GameLobby: React.FC = () => {
         {/* Room List */}
         <div className="room-list-section">
           <div className="room-list-header">
-            <h2>房间列表</h2>
+            <h2>{t('lobby.roomList')}</h2>
             <button
               onClick={handleShowCreateModal}
               className="btn-create-room"
               disabled={loading}
             >
-              创建房间
+              {t('lobby.createRoom')}
             </button>
           </div>
 
           {rooms.length === 0 ? (
             <div className="no-rooms">
-              <p>暂无房间，创建一个开始游戏吧！</p>
+              <p>{t('lobby.noRooms')}</p>
             </div>
           ) : (
             <div className="rooms-grid">
@@ -363,11 +365,11 @@ export const GameLobby: React.FC = () => {
                 <div key={room.roomId} className="room-card">
                   <div className="room-header">
                     <h3>{room.name}</h3>
-                    <span className="room-status">{room.status === 'lobby' ? '等待中' : '游戏中'}</span>
+                    <span className="room-status">{t(`lobby.status.${room.status === 'lobby' ? 'waiting' : 'playing'}`)}</span>
                   </div>
                   <div className="room-info">
-                    <p>玩家: {room.players.length}/{room.maxPlayers}</p>
-                    <p>房主: {room.players.find(p => p.userId === room.hostUserId)?.username}</p>
+                    <p>{t('lobby.players')}: {room.players.length}/{room.maxPlayers}</p>
+                    <p>{t('lobby.host')}: {room.players.find(p => p.userId === room.hostUserId)?.username}</p>
                   </div>
                   <div className="room-players">
                     {room.players.map(player => (
@@ -381,8 +383,8 @@ export const GameLobby: React.FC = () => {
                     disabled={loading || (room.status === 'lobby' && room.players.length >= room.maxPlayers)}
                     className="btn-join-room"
                   >
-                    {room.status === 'playing' ? '重新加入' :
-                     room.players.length >= room.maxPlayers ? '已满' : '加入'}
+                    {room.status === 'playing' ? t('lobby.rejoin') :
+                     room.players.length >= room.maxPlayers ? t('lobby.full') : t('lobby.join')}
                   </button>
                 </div>
               ))}
@@ -395,7 +397,7 @@ export const GameLobby: React.FC = () => {
       {showCreateModal && (
         <div className="modal-overlay" onClick={handleCloseCreateModal}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <h2>创建房间</h2>
+            <h2>{t('lobby.createRoomModal.title')}</h2>
 
             {error && (
               <div className="modal-error">
@@ -404,22 +406,22 @@ export const GameLobby: React.FC = () => {
             )}
 
             <div className="form-group">
-              <label>房间名称 <span className="required">*</span></label>
+              <label>{t('lobby.createRoomModal.roomName')} <span className="required">*</span></label>
               <input
                 type="text"
                 value={roomName}
                 onChange={e => setRoomName(e.target.value)}
-                placeholder="输入房间名称"
+                placeholder={t('lobby.createRoomModal.roomNamePlaceholder')}
                 maxLength={30}
                 autoFocus
               />
               {!roomName.trim() && (
-                <small className="input-hint">请输入房间名称</small>
+                <small className="input-hint">{t('lobby.createRoomModal.roomNameRequired')}</small>
               )}
             </div>
             {selectedGame === 'avalon' && (
               <div className="form-group">
-                <label>最大玩家数 (6-10)</label>
+                <label>{t('lobby.createRoomModal.maxPlayers')}</label>
                 <input
                   type="number"
                   value={maxPlayers}
@@ -431,15 +433,15 @@ export const GameLobby: React.FC = () => {
             )}
             <div className="modal-actions">
               <button onClick={handleCloseCreateModal} className="btn-cancel">
-                取消
+                {t('common.cancel')}
               </button>
               <button
                 onClick={createRoom}
                 className="btn-confirm"
                 disabled={loading || !roomName.trim()}
-                title={!roomName.trim() ? '请先输入房间名称' : '创建房间'}
+                title={!roomName.trim() ? t('lobby.createRoomModal.roomNameRequired') : t('lobby.createRoom')}
               >
-                {loading ? '创建中...' : '创建'}
+                {loading ? t('lobby.createRoomModal.creating') : t('common.confirm')}
               </button>
             </div>
           </div>

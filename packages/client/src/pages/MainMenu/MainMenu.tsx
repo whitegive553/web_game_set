@@ -2,14 +2,23 @@
  * Main Menu - Entry point after login
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../store/AuthContext';
 import './MainMenu.css';
 
 export const MainMenu: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { t, i18n } = useTranslation();
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+    localStorage.setItem('language', lng);
+    setShowLanguageMenu(false);
+  };
 
   const handleStartGame = () => {
     navigate('/game/scene-select');
@@ -37,11 +46,11 @@ export const MainMenu: React.FC = () => {
       <div className="main-menu-container">
         <div className="main-menu-header">
           <h1>WG553 Game Hub</h1>
-          <p className="subtitle">Multiple Games Platform</p>
+          <p className="subtitle">{t('mainMenu.subtitle')}</p>
         </div>
 
         <div className="welcome-section">
-          <p className="welcome-text">欢迎回来，{user?.username}</p>
+          <p className="welcome-text">{t('mainMenu.welcomeBack', { username: user?.username })}</p>
         </div>
 
         <div className="menu-buttons">
@@ -51,7 +60,7 @@ export const MainMenu: React.FC = () => {
             disabled
           >
             <span className="button-icon">🔧</span>
-            单人游戏 (维护中)
+            {t('mainMenu.singlePlayerMaintenance')}
           </button>
 
           <button
@@ -59,7 +68,7 @@ export const MainMenu: React.FC = () => {
             onClick={handleMultiplayer}
           >
             <span className="button-icon">👥</span>
-            多人游戏大厅
+            {t('mainMenu.multiplayer')}
           </button>
 
           <button
@@ -67,7 +76,7 @@ export const MainMenu: React.FC = () => {
             onClick={handleViewHistory}
           >
             <span className="button-icon">📜</span>
-            历史记录
+            {t('mainMenu.history')}
           </button>
 
           <button
@@ -75,7 +84,15 @@ export const MainMenu: React.FC = () => {
             onClick={handleViewAchievements}
           >
             <span className="button-icon">🏆</span>
-            成就系统
+            {t('mainMenu.achievements')}
+          </button>
+
+          <button
+            className="menu-button"
+            onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+          >
+            <span className="button-icon">🌐</span>
+            {t('mainMenu.language')}
           </button>
 
           <button
@@ -83,9 +100,27 @@ export const MainMenu: React.FC = () => {
             onClick={handleLogout}
           >
             <span className="button-icon">🚪</span>
-            登出
+            {t('mainMenu.logout')}
           </button>
         </div>
+
+        {/* Language Menu */}
+        {showLanguageMenu && (
+          <div className="language-menu">
+            <button
+              className={`language-option ${i18n.language === 'zh' ? 'active' : ''}`}
+              onClick={() => changeLanguage('zh')}
+            >
+              {t('language.chinese')}
+            </button>
+            <button
+              className={`language-option ${i18n.language === 'en' ? 'active' : ''}`}
+              onClick={() => changeLanguage('en')}
+            >
+              {t('language.english')}
+            </button>
+          </div>
+        )}
 
         <div className="footer-info">
           <p>

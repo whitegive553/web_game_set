@@ -17,6 +17,7 @@ import { GameLobby } from './pages/GameLobby/GameLobby';
 import { AvalonRoom } from './pages/AvalonRoom/AvalonRoom';
 import { AvalonGame } from './pages/AvalonGame/AvalonGame';
 import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
+import './i18n/config'; // Initialize i18n
 import './App.css';
 
 function App() {

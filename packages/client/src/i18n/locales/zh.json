@@ -1,0 +1,202 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "cancel": "取消",
+    "confirm": "确认",
+    "save": "保存",
+    "back": "返回",
+    "close": "关闭"
+  },
+  "mainMenu": {
+    "subtitle": "Multiple Games Platform",
+    "welcomeBack": "欢迎回来，{{username}}",
+    "singlePlayer": "单人游戏",
+    "singlePlayerMaintenance": "单人游戏 (维护中)",
+    "multiplayer": "多人游戏大厅",
+    "history": "历史记录",
+    "achievements": "成就系统",
+    "logout": "登出",
+    "language": "语言"
+  },
+  "language": {
+    "chinese": "中文",
+    "english": "English",
+    "selectLanguage": "选择语言"
+  },
+  "lobby": {
+    "title": "游戏大厅",
+    "welcome": "欢迎, {{username}}",
+    "backToMenu": "返回主菜单",
+    "logout": "登出",
+    "selectGame": "选择游戏",
+    "roomList": "房间列表",
+    "createRoom": "创建房间",
+    "noRooms": "暂无房间，创建一个开始游戏吧！",
+    "players": "玩家",
+    "host": "房主",
+    "status": {
+      "waiting": "等待中",
+      "playing": "游戏中"
+    },
+    "join": "加入",
+    "rejoin": "重新加入",
+    "full": "已满",
+    "maintenance": "维护中",
+    "createRoomModal": {
+      "title": "创建房间",
+      "roomName": "房间名称",
+      "roomNamePlaceholder": "输入房间名称",
+      "roomNameRequired": "请输入房间名称",
+      "maxPlayers": "最大玩家数 (6-10)",
+      "creating": "创建中..."
+    }
+  },
+  "games": {
+    "avalon": {
+      "name": "阿瓦隆",
+      "description": "6-10人多人游戏",
+      "tags": "角色扮演 · 推理 · 投票"
+    },
+    "textAdventure": {
+      "name": "文字冒险",
+      "description": "单人游戏",
+      "tags": "叙事 · 探索 · 决策"
+    }
+  },
+  "avalonRoom": {
+    "title": "阿瓦隆游戏房间",
+    "help": "帮助",
+    "leaveRoom": "离开房间",
+    "roomInfo": "房间信息",
+    "playerList": "玩家列表",
+    "ready": "准备",
+    "notReady": "未准备",
+    "cancelReady": "取消准备",
+    "startGame": "开始游戏",
+    "starting": "启动中...",
+    "gameConfig": "游戏配置",
+    "targetPlayers": "目标人数",
+    "gameStatus": "游戏状态",
+    "waitingForPlayers": "等待所有玩家准备...",
+    "minPlayersWarning": "阿瓦隆需要至少6名玩家",
+    "hostBadge": "房主",
+    "readyHost": "已准备（房主）",
+    "startGameTooltip": {
+      "waitingReady": "等待所有玩家准备",
+      "minPlayers": "至少需要6名玩家",
+      "maxPlayers": "最多10名玩家",
+      "needExact": "需要{{count}}名玩家",
+      "ready": "开始游戏"
+    }
+  },
+  "avalonConfig": {
+    "title": "游戏配置",
+    "editConfig": "修改配置",
+    "targetPlayerCount": "目标人数",
+    "roleConfig": "角色配置",
+    "goodTeam": "善良阵营",
+    "evilTeam": "邪恶阵营",
+    "playerCount": "{{count}}人",
+    "goodEvilRatio": "（善良{{good}} / 邪恶{{evil}}）",
+    "currentPlayers": "当前已有{{count}}人",
+    "saveConfig": "保存配置",
+    "saving": "保存中...",
+    "validation": {
+      "valid": "配置有效 - 总计{{total}}人（善良{{good}} / 邪恶{{evil}}）",
+      "errors": "配置错误：",
+      "playerCountRange": "玩家人数必须在6-10之间",
+      "totalMismatch": "角色总数({{total}})必须等于目标人数({{target}})",
+      "goodCountMismatch": "善良阵营需要{{required}}人，当前{{actual}}人",
+      "evilCountMismatch": "邪恶阵营需要{{required}}人，当前{{actual}}人"
+    },
+    "roles": {
+      "merlin": "梅林",
+      "percival": "派西维尔",
+      "loyalServant": "忠臣",
+      "assassin": "刺客",
+      "morgana": "莫甘娜",
+      "mordred": "莫德雷德",
+      "oberon": "奥伯伦",
+      "minion": "爪牙",
+      "descriptions": {
+        "merlin": "善良 - 知道所有邪恶（除莫德雷德）",
+        "percival": "善良 - 看到梅林和莫甘娜（无法区分）",
+        "loyalServant": "善良 - 无特殊能力",
+        "assassin": "邪恶 - 可刺杀梅林",
+        "morgana": "邪恶 - 在派西维尔眼中是梅林",
+        "mordred": "邪恶 - 梅林看不到他",
+        "oberon": "邪恶 - 不知道队友，队友也不知道他",
+        "minion": "邪恶 - 无特殊能力"
+      }
+    }
+  },
+  "avalonGame": {
+    "loading": "加载游戏中...",
+    "gameStarting": "游戏即将开始",
+    "prepareRole": "请准备查看你的角色",
+    "preparing": "准备中...",
+    "yourRole": "你的角色",
+    "confirmRole": "我已确认角色，进入游戏",
+    "exitGame": "退出游戏",
+    "confirmExit": "确定要退出游戏吗？",
+    "gameEndedOrNotFound": "游戏已结束或找不到",
+    "help": "帮助",
+    "questProgress": "任务进度",
+    "currentUser": "{{username}}",
+    "currentLeader": "当前队长：",
+    "clickToViewRole": "点击查看角色",
+    "team": {
+      "good": "善良阵营",
+      "evil": "邪恶阵营"
+    },
+    "roleInfo": {
+      "knownEvil": "你知道的邪恶玩家：",
+      "merlinCandidates": "可能是梅林的玩家："
+    },
+    "score": "善良 {{good}} : {{evil}} 邪恶",
+    "selectTeamMembers": "选择任务队员 ({{selected}}/{{total}})",
+    "loadingPlayers": "正在加载玩家列表...",
+    "refreshIfNeeded": "如果持续未显示，请刷新页面",
+    "submitting": "提交中...",
+    "submitTeam": "提交队伍",
+    "voteOnTeam": "对提名队伍投票",
+    "leaderNominated": "队长 {{leader}} 提名了：",
+    "approve": "赞成",
+    "reject": "反对",
+    "questVote": "任务投票",
+    "youAreOnQuest": "你在本次任务中，请投票：",
+    "success": "成功",
+    "fail": "失败",
+    "evilCanFail": "注意：只有邪恶阵营可以投失败",
+    "assassinateMerlin": "刺杀梅林",
+    "selectMerlin": "选择你认为是梅林的玩家：",
+    "waitingForOthers": "等待其他玩家行动...",
+    "leaderSelecting": "队长 {{leader}} 正在选择队员",
+    "waitingForVotes": "等待其他玩家投票...",
+    "waitingForQuestVotes": "等待其他队员完成任务投票...",
+    "assassinSelecting": "刺客正在选择刺杀目标...",
+    "goodWins": "善良阵营获胜！",
+    "evilWins": "邪恶阵营获胜！",
+    "backToLobby": "返回大厅",
+    "players": "玩家 ({{count}})",
+    "online": "在线",
+    "offline": "离线",
+    "phase": {
+      "nomination": "等待队长组队",
+      "teamVote": "对组队进行投票",
+      "questVote": "执行任务",
+      "assassination": "刺杀梅林"
+    }
+  },
+  "avalonHelp": {
+    "title": "阿瓦隆游戏帮助",
+    "close": "关闭",
+    "tabs": {
+      "rules": "游戏规则",
+      "roles": "角色信息",
+      "faq": "常见问题"
+    }
+  }
+}

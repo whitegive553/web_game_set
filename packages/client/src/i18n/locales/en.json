@@ -1,0 +1,202 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "back": "Back",
+    "close": "Close"
+  },
+  "mainMenu": {
+    "subtitle": "Multiple Games Platform",
+    "welcomeBack": "Welcome back, {{username}}",
+    "singlePlayer": "Single Player",
+    "singlePlayerMaintenance": "Single Player (Under Maintenance)",
+    "multiplayer": "Multiplayer Lobby",
+    "history": "History",
+    "achievements": "Achievements",
+    "logout": "Logout",
+    "language": "Language"
+  },
+  "language": {
+    "chinese": "中文",
+    "english": "English",
+    "selectLanguage": "Select Language"
+  },
+  "lobby": {
+    "title": "Game Lobby",
+    "welcome": "Welcome, {{username}}",
+    "backToMenu": "Back to Menu",
+    "logout": "Logout",
+    "selectGame": "Select Game",
+    "roomList": "Room List",
+    "createRoom": "Create Room",
+    "noRooms": "No rooms available. Create one to start!",
+    "players": "Players",
+    "host": "Host",
+    "status": {
+      "waiting": "Waiting",
+      "playing": "Playing"
+    },
+    "join": "Join",
+    "rejoin": "Rejoin",
+    "full": "Full",
+    "maintenance": "Under Maintenance",
+    "createRoomModal": {
+      "title": "Create Room",
+      "roomName": "Room Name",
+      "roomNamePlaceholder": "Enter room name",
+      "roomNameRequired": "Please enter a room name",
+      "maxPlayers": "Max Players (6-10)",
+      "creating": "Creating..."
+    }
+  },
+  "games": {
+    "avalon": {
+      "name": "Avalon",
+      "description": "6-10 player multiplayer",
+      "tags": "Role-playing · Deduction · Voting"
+    },
+    "textAdventure": {
+      "name": "Text Adventure",
+      "description": "Single player",
+      "tags": "Narrative · Exploration · Choice"
+    }
+  },
+  "avalonRoom": {
+    "title": "Avalon Game Room",
+    "help": "Help",
+    "leaveRoom": "Leave Room",
+    "roomInfo": "Room Info",
+    "playerList": "Player List",
+    "ready": "Ready",
+    "notReady": "Not Ready",
+    "cancelReady": "Cancel Ready",
+    "startGame": "Start Game",
+    "starting": "Starting...",
+    "gameConfig": "Game Configuration",
+    "targetPlayers": "Target Players",
+    "gameStatus": "Game Status",
+    "waitingForPlayers": "Waiting for all players to ready...",
+    "minPlayersWarning": "Avalon requires at least 6 players",
+    "hostBadge": "Host",
+    "readyHost": "Ready (Host)",
+    "startGameTooltip": {
+      "waitingReady": "Waiting for all players to ready",
+      "minPlayers": "Requires at least 6 players",
+      "maxPlayers": "Maximum 10 players",
+      "needExact": "Need {{count}} players",
+      "ready": "Start Game"
+    }
+  },
+  "avalonConfig": {
+    "title": "Game Configuration",
+    "editConfig": "Edit Config",
+    "targetPlayerCount": "Target Players",
+    "roleConfig": "Role Configuration",
+    "goodTeam": "Good Team",
+    "evilTeam": "Evil Team",
+    "playerCount": "{{count}} players",
+    "goodEvilRatio": "(Good {{good}} / Evil {{evil}})",
+    "currentPlayers": "Current {{count}} players",
+    "saveConfig": "Save Config",
+    "saving": "Saving...",
+    "validation": {
+      "valid": "Valid config - Total {{total}} (Good {{good}} / Evil {{evil}})",
+      "errors": "Configuration errors:",
+      "playerCountRange": "Player count must be between 6-10",
+      "totalMismatch": "Total roles ({{total}}) must equal target ({{target}})",
+      "goodCountMismatch": "Good team needs {{required}}, current {{actual}}",
+      "evilCountMismatch": "Evil team needs {{required}}, current {{actual}}"
+    },
+    "roles": {
+      "merlin": "Merlin",
+      "percival": "Percival",
+      "loyalServant": "Loyal Servant",
+      "assassin": "Assassin",
+      "morgana": "Morgana",
+      "mordred": "Mordred",
+      "oberon": "Oberon",
+      "minion": "Minion",
+      "descriptions": {
+        "merlin": "Good - Sees all evil (except Mordred)",
+        "percival": "Good - Sees Merlin and Morgana (can't tell apart)",
+        "loyalServant": "Good - No special ability",
+        "assassin": "Evil - Can assassinate Merlin",
+        "morgana": "Evil - Appears as Merlin to Percival",
+        "mordred": "Evil - Invisible to Merlin",
+        "oberon": "Evil - Doesn't know teammates, teammates don't know him",
+        "minion": "Evil - No special ability"
+      }
+    }
+  },
+  "avalonGame": {
+    "loading": "Loading game...",
+    "gameStarting": "Game Starting",
+    "prepareRole": "Prepare to see your role",
+    "preparing": "Preparing...",
+    "yourRole": "Your Role",
+    "confirmRole": "Confirm role and enter game",
+    "exitGame": "Exit Game",
+    "confirmExit": "Are you sure you want to exit the game?",
+    "gameEndedOrNotFound": "Game has ended or not found",
+    "help": "Help",
+    "questProgress": "Quest Progress",
+    "currentUser": "{{username}}",
+    "currentLeader": "Current Leader:",
+    "clickToViewRole": "Click to view role",
+    "team": {
+      "good": "Good",
+      "evil": "Evil"
+    },
+    "roleInfo": {
+      "knownEvil": "Known evil players:",
+      "merlinCandidates": "Merlin candidates:"
+    },
+    "score": "Good {{good}} : {{evil}} Evil",
+    "selectTeamMembers": "Select team members ({{selected}}/{{total}})",
+    "loadingPlayers": "Loading player list...",
+    "refreshIfNeeded": "Please refresh if not showing",
+    "submitting": "Submitting...",
+    "submitTeam": "Submit Team",
+    "voteOnTeam": "Vote on Nominated Team",
+    "leaderNominated": "Leader {{leader}} nominated:",
+    "approve": "Approve",
+    "reject": "Reject",
+    "questVote": "Quest Vote",
+    "youAreOnQuest": "You are on this quest, please vote:",
+    "success": "Success",
+    "fail": "Fail",
+    "evilCanFail": "Note: Only evil can vote fail",
+    "assassinateMerlin": "Assassinate Merlin",
+    "selectMerlin": "Select who you think is Merlin:",
+    "waitingForOthers": "Waiting for other players...",
+    "leaderSelecting": "Leader {{leader}} is selecting team members",
+    "waitingForVotes": "Waiting for other players to vote...",
+    "waitingForQuestVotes": "Waiting for other team members to complete quest vote...",
+    "assassinSelecting": "Assassin is selecting target...",
+    "goodWins": "Good Team Wins!",
+    "evilWins": "Evil Team Wins!",
+    "backToLobby": "Back to Lobby",
+    "players": "Players ({{count}})",
+    "online": "Online",
+    "offline": "Offline",
+    "phase": {
+      "nomination": "Waiting for leader to nominate",
+      "teamVote": "Vote on team",
+      "questVote": "Execute quest",
+      "assassination": "Assassinate Merlin"
+    }
+  },
+  "avalonHelp": {
+    "title": "Avalon Game Help",
+    "close": "Close",
+    "tabs": {
+      "rules": "Game Rules",
+      "roles": "Role Information",
+      "faq": "FAQ"
+    }
+  }
+}

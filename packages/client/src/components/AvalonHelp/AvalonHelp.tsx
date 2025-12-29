@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import './AvalonHelp.css';
 
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
 type TabType = 'rules' | 'roles' | 'faq';
 
 export const AvalonHelp: React.FC<Props> = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabType>('rules');
 
   if (!isOpen) return null;
@@ -22,7 +24,7 @@ export const AvalonHelp: React.FC<Props> = ({ isOpen, onClose }) => {
     <div className="help-modal-overlay" onClick={onClose}>
       <div className="help-modal-content" onClick={e => e.stopPropagation()}>
         <div className="help-modal-header">
-          <h2>阿瓦隆游戏帮助</h2>
+          <h2>{t('avalonHelp.title')}</h2>
           <button className="help-close-btn" onClick={onClose}>×</button>
         </div>
 
@@ -31,19 +33,19 @@ export const AvalonHelp: React.FC<Props> = ({ isOpen, onClose }) => {
             className={`help-tab ${activeTab === 'rules' ? 'active' : ''}`}
             onClick={() => setActiveTab('rules')}
           >
-            游戏规则
+            {t('avalonHelp.tabs.rules')}
           </button>
           <button
             className={`help-tab ${activeTab === 'roles' ? 'active' : ''}`}
             onClick={() => setActiveTab('roles')}
           >
-            角色信息
+            {t('avalonHelp.tabs.roles')}
           </button>
           <button
             className={`help-tab ${activeTab === 'faq' ? 'active' : ''}`}
             onClick={() => setActiveTab('faq')}
           >
-            常见问题
+            {t('avalonHelp.tabs.faq')}
           </button>
         </div>
 

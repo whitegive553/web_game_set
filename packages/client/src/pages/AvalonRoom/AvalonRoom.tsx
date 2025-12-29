@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../store/AuthContext';
 import { getWebSocketClient } from '../../services/websocket-client';
 import { API_CONFIG } from '../../config/api';
@@ -61,6 +62,7 @@ export const AvalonRoom: React.FC = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
   const { token, user } = useAuth();
+  const { t } = useTranslation();
   const [room, setRoom] = useState<Room | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -328,7 +330,7 @@ export const AvalonRoom: React.FC = () => {
   if (!room) {
     return (
       <div className="avalon-room loading">
-        <p>加载中...</p>
+        <p>{t('common.loading')}</p>
       </div>
     );
   }
@@ -362,14 +364,14 @@ export const AvalonRoom: React.FC = () => {
       <div className="room-header">
         <div>
           <h1>{room.name}</h1>
-          <p className="room-subtitle">阿瓦隆游戏房间</p>
+          <p className="room-subtitle">{t('avalonRoom.title')}</p>
         </div>
         <div className="room-header-actions">
           <button onClick={() => setShowHelp(true)} className="btn-help">
-            帮助
+            {t('avalonRoom.help')}
           </button>
           <button onClick={leaveRoom} className="btn-leave">
-            离开房间
+            {t('avalonRoom.leaveRoom')}
           </button>
         </div>
       </div>
@@ -393,36 +395,36 @@ export const AvalonRoom: React.FC = () => {
         <div className="room-panels">
           {/* Room Info */}
           <div className="room-info-panel">
-          <h2>房间信息</h2>
+          <h2>{t('avalonRoom.roomInfo')}</h2>
           <div className="info-item">
-            <span>房主:</span>
+            <span>{t('lobby.host')}:</span>
             <strong>{room.players.find(p => p.userId === room.hostUserId)?.username}</strong>
           </div>
           <div className="info-item">
-            <span>玩家数量:</span>
+            <span>{t('lobby.players')}:</span>
             <strong>{room.players.length}/{targetPlayerCount}</strong>
           </div>
           <div className="info-item">
-            <span>游戏状态:</span>
+            <span>{t('avalonRoom.gameStatus')}:</span>
             <strong className={room.status === 'lobby' ? 'status-waiting' : 'status-playing'}>
-              {room.status === 'lobby' ? '等待中' : '游戏中'}
+              {t(`lobby.status.${room.status === 'lobby' ? 'waiting' : 'playing'}`)}
             </strong>
           </div>
           {room.players.length < 6 && (
             <div className="warning-box">
-              ⚠️ 阿瓦隆需要至少6名玩家
+              ⚠️ {t('avalonRoom.minPlayersWarning')}
             </div>
           )}
           {room.players.length >= 6 && !allReady && (
             <div className="info-box">
-              等待所有玩家准备...
+              {t('avalonRoom.waitingForPlayers')}
             </div>
           )}
         </div>
 
         {/* Players List */}
         <div className="players-panel">
-          <h2>玩家列表</h2>
+          <h2>{t('avalonRoom.playerList')}</h2>
           <div className="players-list">
             {room.players.map(player => {
               const isPlayerHost = player.userId === room.hostUserId;
@@ -436,10 +438,10 @@ export const AvalonRoom: React.FC = () => {
                   <div className="player-info">
                     <span className="player-name">
                       {player.username}
-                      {isPlayerHost && <span className="host-badge">房主</span>}
+                      {isPlayerHost && <span className="host-badge">{t('avalonRoom.hostBadge')}</span>}
                     </span>
                     <span className={`player-status ${isPlayerReady ? 'ready' : 'not-ready'}`}>
-                      {isPlayerHost ? '✓ 已准备（房主）' : (player.ready ? '✓ 已准备' : '未准备')}
+                      {isPlayerHost ? `✓ ${t('avalonRoom.readyHost')}` : (player.ready ? `✓ ${t('avalonRoom.ready')}` : t('avalonRoom.notReady'))}
                     </span>
                   </div>
                 </div>
@@ -458,7 +460,7 @@ export const AvalonRoom: React.FC = () => {
             className={`btn-ready ${isReady ? 'ready' : ''}`}
             disabled={loading}
           >
-            {isReady ? '取消准备' : '准备'}
+            {isReady ? t('avalonRoom.cancelReady') : t('avalonRoom.ready')}
           </button>
         )}
         {isHost && (
@@ -467,14 +469,14 @@ export const AvalonRoom: React.FC = () => {
             className="btn-start"
             disabled={!canStart || loading}
             title={
-              !allReady ? '等待所有玩家准备' :
-              room.players.length < 6 ? '至少需要6名玩家' :
-              room.players.length > 10 ? '最多10名玩家' :
-              room.players.length !== targetPlayerCount ? `需要${targetPlayerCount}名玩家` :
-              '开始游戏'
+              !allReady ? t('avalonRoom.startGameTooltip.waitingReady') :
+              room.players.length < 6 ? t('avalonRoom.startGameTooltip.minPlayers') :
+              room.players.length > 10 ? t('avalonRoom.startGameTooltip.maxPlayers') :
+              room.players.length !== targetPlayerCount ? t('avalonRoom.startGameTooltip.needExact', { count: targetPlayerCount }) :
+              t('avalonRoom.startGameTooltip.ready')
             }
           >
-            {loading ? '启动中...' : '开始游戏'}
+            {loading ? t('avalonRoom.starting') : t('avalonRoom.startGame')}
           </button>
         )}
       </div>
