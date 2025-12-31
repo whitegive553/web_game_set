@@ -25,6 +25,10 @@ RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 # 复制源代码（放在依赖安装之后，优化缓存）
 COPY packages ./packages
 
+# 重新安装依赖以建立正确的符号链接
+RUN echo "=== Re-installing dependencies with source code ===" && \
+    npm install
+
 # 构建所有包（按依赖顺序，添加详细日志）
 RUN echo "=== Building packages ===" && \
     npm run build --workspace=packages/shared && \
