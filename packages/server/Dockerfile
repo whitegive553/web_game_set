@@ -98,6 +98,10 @@ RUN npm cache clean --force
 # 清理构建工具以减小镜像
 RUN apk del python3 make g++
 
+# 创建数据目录并设置权限
+RUN mkdir -p /app/data/avalon && \
+    chmod -R 777 /app/data
+
 # 设置环境变量
 ENV NODE_ENV=production
 ENV PORT=3001

@@ -32,42 +32,49 @@ export class AvalonHistoryService {
     roleAssignments: Record<string, string>;
     config: any;
   }): Promise<void> {
-    console.log(`[AvalonHistory] ========== Recording game start: ${gameData.gameId} ==========`);
+    try {
+      console.log(`[AvalonHistory] ========== Recording game start: ${gameData.gameId} ==========`);
 
-    // 创建参与者信息
-    const participants: AvalonParticipant[] = gameData.players.map((player, index) => {
-      const role = gameData.roleAssignments[player.userId];
-      const alignment = this.getRoleAlignment(role);
+      // 创建参与者信息
+      const participants: AvalonParticipant[] = gameData.players.map((player, index) => {
+        const role = gameData.roleAssignments[player.userId];
+        const alignment = this.getRoleAlignment(role);
 
-      return {
-        userId: player.userId,
-        username: player.username,
-        seat: index,
-        role,
-        alignment,
-        isWinner: false // 游戏结束时更新
+        return {
+          userId: player.userId,
+          username: player.username,
+          seat: index,
+          role,
+          alignment,
+          isWinner: false // 游戏结束时更新
+        };
+      });
+
+      // 保存参与者信息
+      await avalonHistoryRepository.saveParticipants({
+        gameId: gameData.gameId,
+        participants
+      });
+
+      // 追加 GAME_STARTED 事件
+      const event: GameStartedEvent = {
+        eventId: `${gameData.gameId}_START_${Date.now()}`,
+        gameId: gameData.gameId,
+        timestamp: gameData.startedAt,
+        type: 'GAME_STARTED',
+        payload: {
+          playerCount: gameData.players.length,
+          configSnapshot: gameData.config
+        }
       };
-    });
 
-    // 保存参与者信息
-    await avalonHistoryRepository.saveParticipants({
-      gameId: gameData.gameId,
-      participants
-    });
-
-    // 追加 GAME_STARTED 事件
-    const event: GameStartedEvent = {
-      eventId: `${gameData.gameId}_START_${Date.now()}`,
-      gameId: gameData.gameId,
-      timestamp: gameData.startedAt,
-      type: 'GAME_STARTED',
-      payload: {
-        playerCount: gameData.players.length,
-        configSnapshot: gameData.config
-      }
-    };
-
-    await avalonHistoryRepository.appendEvent(event);
+      await avalonHistoryRepository.appendEvent(event);
+      console.log(`[AvalonHistory] ✓ Game start recorded successfully`);
+    } catch (error) {
+      console.error(`[AvalonHistory] ❌ ERROR recording game start for ${gameData.gameId}:`, error);
+      console.error(`[AvalonHistory] Stack:`, (error as Error).stack);
+      // 不抛出错误，避免影响游戏流程
+    }
   }
 
   /**

@@ -136,8 +136,19 @@ fi
 
 print_info "环境变量配置检查完成"
 
-# 3. 停止旧服务
-print_step "3/7 停止旧服务（如果存在）"
+# 3. 创建数据目录
+print_step "3/8 创建数据目录"
+
+if [ ! -d "./data" ]; then
+    mkdir -p ./data/avalon
+    chmod -R 777 ./data
+    print_info "数据目录已创建: ./data"
+else
+    print_info "数据目录已存在: ./data"
+fi
+
+# 4. 停止旧服务
+print_step "4/8 停止旧服务（如果存在）"
 
 if $DOCKER_COMPOSE_CMD ps 2>/dev/null | grep -q "Up"; then
     print_info "检测到运行中的服务，正在停止..."
@@ -147,8 +158,8 @@ else
     print_info "没有运行中的服务"
 fi
 
-# 4. 构建镜像
-print_step "4/7 构建 Docker 镜像"
+# 5. 构建镜像
+print_step "5/8 构建 Docker 镜像"
 
 print_warn "首次构建可能需要 10-15 分钟，请耐心等待..."
 
@@ -159,8 +170,8 @@ else
     exit 1
 fi
 
-# 5. 启动服务
-print_step "5/7 启动服务"
+# 6. 启动服务
+print_step "6/8 启动服务"
 
 if $DOCKER_COMPOSE_CMD up -d; then
     print_info "服务启动成功"
@@ -169,8 +180,8 @@ else
     exit 1
 fi
 
-# 6. 等待服务就绪
-print_step "6/7 等待服务就绪"
+# 7. 等待服务就绪
+print_step "7/8 等待服务就绪"
 
 print_info "等待后端服务启动..."
 sleep 10
@@ -221,8 +232,8 @@ done
 
 echo ""
 
-# 7. 验证部署
-print_step "7/7 验证部署"
+# 8. 验证部署
+print_step "8/8 验证部署"
 
 # 检查容器状态
 print_info "容器状态："

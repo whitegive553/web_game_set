@@ -24,11 +24,23 @@ export class AvalonHistoryRepository {
    */
   private async ensureDir(dirPath: string): Promise<void> {
     try {
+      console.log(`[AvalonHistory] ========================================`);
       console.log(`[AvalonHistory] Creating directory: ${dirPath}`);
+      console.log(`[AvalonHistory] process.cwd(): ${process.cwd()}`);
+      console.log(`[AvalonHistory] DATA_ROOT: ${DATA_ROOT}`);
+      console.log(`[AvalonHistory] ========================================`);
       await fs.mkdir(dirPath, { recursive: true });
-      console.log(`[AvalonHistory] Directory created successfully: ${dirPath}`);
+      console.log(`[AvalonHistory] ✓ Directory created successfully: ${dirPath}`);
+
+      // 验证目录是否可写
+      const testFile = `${dirPath}/.test`;
+      await fs.writeFile(testFile, 'test', 'utf-8');
+      await fs.unlink(testFile);
+      console.log(`[AvalonHistory] ✓ Directory is writable: ${dirPath}`);
     } catch (error) {
-      console.error('[AvalonHistory] Error creating directory:', dirPath, error);
+      console.error('[AvalonHistory] ❌ ERROR creating/writing to directory:', dirPath);
+      console.error('[AvalonHistory] Error details:', error);
+      console.error('[AvalonHistory] Stack:', (error as Error).stack);
       throw error;
     }
   }
