@@ -44,6 +44,9 @@ RUN echo "=== Building packages ===" && \
 RUN echo "=== Verifying build outputs ===" && \
     test -f packages/shared/dist/index.js && echo "✓ shared verified" && \
     test -f packages/game-engine/dist/index.js && echo "✓ game-engine verified" && \
+    echo "=== Checking games build structure ===" && \
+    ls -la packages/games/dist/ && \
+    find packages/games/dist -name "index.js" -type f && \
     test -f packages/games/dist/index.js && echo "✓ games verified" && \
     echo "=== Checking server build structure ===" && \
     find packages/server/dist -name "index.js" -type f && \
