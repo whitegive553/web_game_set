@@ -55,6 +55,9 @@ RUN echo "=== Verifying build outputs ===" && \
         echo "✓ games cleaned shared dir"; \
     fi && \
     test -f packages/games/dist/index.js && echo "✓ games verified" && \
+    echo "=== Checking server build structure ===" && \
+    ls -la packages/server/dist/ && \
+    find packages/server/dist -name "index.js" -type f && \
     echo "=== Flattening server dist structure ===" && \
     if [ -d packages/server/dist/packages/server/src ]; then \
         cp -r packages/server/dist/packages/server/src/* packages/server/dist/ && \
