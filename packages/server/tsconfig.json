@@ -9,13 +9,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
-    "baseUrl": ".",
-    "paths": {
-      "@survival-game/shared": ["../shared/src/index.ts"],
-      "@survival-game/game-engine": ["../game-engine/src/index.ts"],
-      "@survival-game/games": ["../games/src/index.ts"]
-    }
+    "moduleResolution": "node"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
