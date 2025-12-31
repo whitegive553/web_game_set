@@ -58,12 +58,9 @@ RUN echo "=== Verifying build outputs ===" && \
     echo "=== Checking server build structure ===" && \
     ls -la packages/server/dist/ && \
     find packages/server/dist -name "index.js" -type f && \
-    echo "=== Flattening server dist structure ===" && \
-    if [ -d packages/server/dist/packages/server/src ]; then \
-        cp -r packages/server/dist/packages/server/src/* packages/server/dist/ && \
-        rm -rf packages/server/dist/packages && \
-        echo "✓ server structure flattened"; \
-    fi && \
+    echo "=== Cleaning server dependency dirs ===" && \
+    rm -rf packages/server/dist/server packages/server/dist/game-engine packages/server/dist/games packages/server/dist/shared packages/server/dist/packages && \
+    echo "✓ server cleaned dependency dirs" && \
     test -f packages/server/dist/index.js && echo "✓ server verified" || \
     (echo "ERROR: Build verification failed" && exit 1)
 
