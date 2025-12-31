@@ -40,21 +40,26 @@ RUN echo "=== Building packages ===" && \
     npm run build --workspace=packages/server && \
     echo "✓ server build OK"
 
-# 验证所有构建产物
+# 验证并调整构建产物结构
 RUN echo "=== Verifying build outputs ===" && \
     test -f packages/shared/dist/index.js && echo "✓ shared verified" && \
     test -f packages/game-engine/dist/index.js && echo "✓ game-engine verified" && \
-    echo "=== Checking games build structure ===" && \
-    ls -la packages/games/dist/ && \
-    find packages/games/dist -name "index.js" -type f && \
+    echo "=== Flattening games dist structure ===" && \
+    if [ -d packages/games/dist/games/src ]; then \
+        cp -r packages/games/dist/games/src/* packages/games/dist/ && \
+        rm -rf packages/games/dist/games && \
+        echo "✓ games structure flattened"; \
+    fi && \
+    if [ -d packages/games/dist/shared ]; then \
+        rm -rf packages/games/dist/shared && \
+        echo "✓ games cleaned shared dir"; \
+    fi && \
     test -f packages/games/dist/index.js && echo "✓ games verified" && \
-    echo "=== Checking server build structure ===" && \
-    find packages/server/dist -name "index.js" -type f && \
     echo "=== Flattening server dist structure ===" && \
     if [ -d packages/server/dist/packages/server/src ]; then \
         cp -r packages/server/dist/packages/server/src/* packages/server/dist/ && \
         rm -rf packages/server/dist/packages && \
-        echo "✓ server build structure fixed"; \
+        echo "✓ server structure flattened"; \
     fi && \
     test -f packages/server/dist/index.js && echo "✓ server verified" || \
     (echo "ERROR: Build verification failed" && exit 1)
