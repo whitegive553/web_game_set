@@ -35,6 +35,10 @@ RUN echo "=== Building shared package ===" && \
     echo "=== Building games ===" && \
     cd games && npx tsc && cd .. && \
     ls -la games/dist/ && \
+    echo "=== Copying compiled games to source directory ===" && \
+    cp games/dist/avalon/*.js games/avalon/ && \
+    cp games/dist/avalon/*.d.ts games/avalon/ && \
+    echo "✓ Games copied to source directory" && \
     echo "=== Building server package ===" && \
     npm run build --workspace=packages/server && \
     ls -la packages/server/dist/
