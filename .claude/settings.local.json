@@ -15,7 +15,12 @@
       "Bash(tree:*)",
       "Bash(dir:*)",
       "Bash(npx ts-node:*)",
-      "Bash(tsc:*)"
+      "Bash(tsc:*)",
+      "Bash(find:*)",
+      "Bash(npm start)",
+      "Bash(node -e:*)",
+      "Bash(taskkill:*)",
+      "Bash(timeout /t 2)"
     ]
   }
 }
