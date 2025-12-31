@@ -6,11 +6,14 @@ export declare enum AvalonTeam {
     EVIL = "evil"
 }
 export declare enum AvalonRole {
-    MERLIN = "merlin",// Good: Knows all evil players
+    MERLIN = "merlin",// Good: Knows all evil players except Mordred
     PERCIVAL = "percival",// Good: Sees Merlin/Morgana candidates
     LOYAL_SERVANT = "loyal_servant",// Good: No special ability
     ASSASSIN = "assassin",// Evil: Can assassinate Merlin
-    MORGANA = "morgana"
+    MORGANA = "morgana",// Evil: Appears as Merlin to Percival
+    MORDRED = "mordred",// Evil: Hidden from Merlin, visible to evil
+    OBERON = "oberon",// Evil: Hidden from evil, doesn't see evil
+    MINION = "minion"
 }
 export interface RoleInfo {
     role: AvalonRole;
@@ -19,6 +22,9 @@ export interface RoleInfo {
     seesMerlinCandidates?: boolean;
     canAssassinate?: boolean;
     appearsAsMerlin?: boolean;
+    hiddenFromMerlin?: boolean;
+    hiddenFromEvil?: boolean;
+    cannotSeeEvil?: boolean;
 }
 export declare enum AvalonPhase {
     LOBBY = "LOBBY",
@@ -45,6 +51,27 @@ export interface PlayerCountConfig {
     };
     quests: QuestConfig[];
 }
+export interface AvalonRoomConfig {
+    targetPlayerCount: number;
+    roleConfig: RoleConfiguration;
+}
+export interface RoleConfiguration {
+    merlin: number;
+    percival: number;
+    loyalServant: number;
+    assassin: number;
+    morgana: number;
+    mordred: number;
+    oberon: number;
+    minion: number;
+}
+export interface RoleConfigValidation {
+    valid: boolean;
+    errors: string[];
+    totalRoles?: number;
+    goodCount?: number;
+    evilCount?: number;
+}
 export interface AvalonGameState {
     phase: AvalonPhase;
     round: number;
@@ -56,9 +83,16 @@ export interface AvalonGameState {
     nominatedTeam: string[];
     teamVotes: Record<string, boolean>;
     questVotes: Record<string, boolean>;
+    currentQuestTeamVotes: TeamVoteHistory[];
     assassinTarget?: string;
     winner?: AvalonTeam;
     roleAssignments: Record<string, AvalonRole>;
+}
+export interface TeamVoteHistory {
+    nominatedTeam: string[];
+    approvals: string[];
+    rejections: string[];
+    passed: boolean;
 }
 export interface QuestResult {
     questNumber: number;
@@ -66,10 +100,15 @@ export interface QuestResult {
     successVotes: number;
     failVotes: number;
     success: boolean;
+    teamVoteHistory: TeamVoteHistory[];
 }
 export interface AvalonAction {
-    type: 'READY' | 'START' | 'NOMINATE_TEAM' | 'VOTE_TEAM' | 'VOTE_QUEST' | 'ASSASSINATE';
+    type: 'READY' | 'START' | 'NOMINATE_TEAM' | 'VOTE_TEAM' | 'VOTE_QUEST' | 'ASSASSINATE' | 'UPDATE_CONFIG';
     payload?: any;
+}
+export interface UpdateConfigPayload {
+    targetPlayerCount?: number;
+    roleConfig?: RoleConfiguration;
 }
 export interface NominateTeamPayload {
     teamUserIds: string[];
@@ -89,6 +128,8 @@ export interface AvalonPrivateState {
     team: AvalonTeam;
     evilPlayers?: string[];
     merlinCandidates?: string[];
+    knownEvil?: string[];
+    hasVotedQuest?: boolean;
 }
 export interface AvalonPublicState {
     phase: AvalonPhase;

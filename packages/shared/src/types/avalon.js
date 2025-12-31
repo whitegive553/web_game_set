@@ -19,6 +19,8 @@ var AvalonRole;
     AvalonRole["LOYAL_SERVANT"] = "loyal_servant";
     AvalonRole["ASSASSIN"] = "assassin";
     AvalonRole["MORGANA"] = "morgana";
+    AvalonRole["MORDRED"] = "mordred";
+    AvalonRole["OBERON"] = "oberon";
     AvalonRole["MINION"] = "minion";
 })(AvalonRole || (exports.AvalonRole = AvalonRole = {}));
 // ============================================================================
@@ -35,3 +37,4 @@ var AvalonPhase;
     AvalonPhase["ASSASSINATION"] = "ASSASSINATION";
     AvalonPhase["GAME_OVER"] = "GAME_OVER";
 })(AvalonPhase || (exports.AvalonPhase = AvalonPhase = {}));
+//# sourceMappingURL=avalon.js.map

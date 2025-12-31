@@ -39,10 +39,20 @@ RUN echo "=== Building shared package ===" && \
     npm run build --workspace=packages/server && \
     ls -la packages/server/dist/
 
-# 验证所有构建产物并调整 server 输出结构
+# 验证所有构建产物并调整输出结构
 RUN echo "=== Verifying build outputs ===" && \
     test -f packages/shared/dist/index.js && echo "✓ shared build OK" && \
     test -f packages/game-engine/dist/index.js && echo "✓ game-engine build OK" && \
+    echo "=== Flattening games dist structure ===" && \
+    if [ -d games/dist/games ]; then \
+        cp -r games/dist/games/* games/dist/ && \
+        rm -rf games/dist/games && \
+        echo "✓ games build structure fixed"; \
+    fi && \
+    if [ -d games/dist/packages ]; then \
+        rm -rf games/dist/packages && \
+        echo "✓ games cleaned packages dir"; \
+    fi && \
     test -f games/dist/avalon/avalon-game.js && echo "✓ games build OK" && \
     echo "=== Checking server build structure ===" && \
     find packages/server/dist -name "index.js" -type f && \

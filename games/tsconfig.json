@@ -19,7 +19,7 @@
     }
   },
   "include": [
-    "**/*.ts"
+    "avalon/**/*.ts"
   ],
   "exclude": [
     "node_modules",
