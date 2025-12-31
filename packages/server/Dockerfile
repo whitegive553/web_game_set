@@ -16,6 +16,7 @@ COPY package.json package-lock.json* ./
 COPY packages/server/package.json ./packages/server/package.json
 COPY packages/shared/package.json ./packages/shared/package.json
 COPY packages/game-engine/package.json ./packages/game-engine/package.json
+COPY packages/games/package.json ./packages/games/package.json
 
 # 安装所有依赖（包括 devDependencies）
 # 使用 npm ci 更快且更可靠
@@ -23,41 +24,23 @@ RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 # 复制源代码（放在依赖安装之后，优化缓存）
 COPY packages ./packages
-COPY games ./games
 
 # 构建所有包（按依赖顺序，添加详细日志）
-RUN echo "=== Building shared package ===" && \
+RUN echo "=== Building packages ===" && \
     npm run build --workspace=packages/shared && \
-    ls -la packages/shared/dist/ && \
-    echo "=== Building game-engine package ===" && \
+    echo "✓ shared build OK" && \
     npm run build --workspace=packages/game-engine && \
-    ls -la packages/game-engine/dist/ && \
-    echo "=== Building games ===" && \
-    cd games && npx tsc && cd .. && \
-    ls -la games/dist/ && \
-    echo "=== Copying compiled games to source directory ===" && \
-    cp games/dist/avalon/*.js games/avalon/ && \
-    cp games/dist/avalon/*.d.ts games/avalon/ && \
-    echo "✓ Games copied to source directory" && \
-    echo "=== Building server package ===" && \
+    echo "✓ game-engine build OK" && \
+    npm run build --workspace=packages/games && \
+    echo "✓ games build OK" && \
     npm run build --workspace=packages/server && \
-    ls -la packages/server/dist/
+    echo "✓ server build OK"
 
-# 验证所有构建产物并调整输出结构
+# 验证所有构建产物
 RUN echo "=== Verifying build outputs ===" && \
-    test -f packages/shared/dist/index.js && echo "✓ shared build OK" && \
-    test -f packages/game-engine/dist/index.js && echo "✓ game-engine build OK" && \
-    echo "=== Flattening games dist structure ===" && \
-    if [ -d games/dist/games ]; then \
-        cp -r games/dist/games/* games/dist/ && \
-        rm -rf games/dist/games && \
-        echo "✓ games build structure fixed"; \
-    fi && \
-    if [ -d games/dist/packages ]; then \
-        rm -rf games/dist/packages && \
-        echo "✓ games cleaned packages dir"; \
-    fi && \
-    test -f games/dist/avalon/avalon-game.js && echo "✓ games build OK" && \
+    test -f packages/shared/dist/index.js && echo "✓ shared verified" && \
+    test -f packages/game-engine/dist/index.js && echo "✓ game-engine verified" && \
+    test -f packages/games/dist/index.js && echo "✓ games verified" && \
     echo "=== Checking server build structure ===" && \
     find packages/server/dist -name "index.js" -type f && \
     echo "=== Flattening server dist structure ===" && \
@@ -66,7 +49,7 @@ RUN echo "=== Verifying build outputs ===" && \
         rm -rf packages/server/dist/packages && \
         echo "✓ server build structure fixed"; \
     fi && \
-    test -f packages/server/dist/index.js && echo "✓ server build OK" || \
+    test -f packages/server/dist/index.js && echo "✓ server verified" || \
     (echo "ERROR: Build verification failed" && exit 1)
 
 WORKDIR /app
@@ -86,12 +69,13 @@ COPY package.json package-lock.json* ./
 COPY packages/server/package.json ./packages/server/package.json
 COPY packages/shared/package.json ./packages/shared/package.json
 COPY packages/game-engine/package.json ./packages/game-engine/package.json
+COPY packages/games/package.json ./packages/games/package.json
 
 # 从构建阶段复制编译后的文件（在 npm install 之前）
 COPY --from=build /app/packages/server/dist ./packages/server/dist
 COPY --from=build /app/packages/shared/dist ./packages/shared/dist
 COPY --from=build /app/packages/game-engine/dist ./packages/game-engine/dist
-COPY --from=build /app/games ./games
+COPY --from=build /app/packages/games/dist ./packages/games/dist
 
 # 安装生产依赖（npm workspaces 会自动创建符号链接）
 RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi

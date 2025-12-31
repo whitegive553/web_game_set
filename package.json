@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspace=packages/server & npm run dev --workspace=packages/client",
-    "build": "cd games && npx tsc && cp dist/avalon/*.js avalon/ && cp dist/avalon/*.d.ts avalon/ && cd .. && npm run build --workspaces",
+    "build": "npm run build --workspaces --if-present",
     "start": "node packages/server/dist/packages/server/src/index.js",
     "test": "npm run test --workspaces"
   },

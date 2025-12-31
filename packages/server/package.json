@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@survival-game/game-engine": "*",
+    "@survival-game/games": "*",
     "@survival-game/shared": "*",
     "@types/ws": "^8.18.1",
     "bcrypt": "^5.1.1",

@@ -14,7 +14,7 @@ import {
   getDefaultRoomConfig,
   roleConfigToPlayerCountConfig
 } from '@survival-game/shared';
-import { AvalonGame } from '../../../../games/avalon/avalon-game';
+import { AvalonGame } from '@survival-game/games';
 import { avalonHistoryService } from '../services/avalon-history-service';
 
 console.log('[AvalonRoutes] Module loaded, AvalonGame:', AvalonGame ? 'OK' : 'FAILED');

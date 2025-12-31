@@ -47,5 +47,4 @@ coverage/
 
 # Runtime data (user data, game states, history records)
 packages/server/data/
-games/avalon/*.js
-games/avalon/*.d.ts
+# Games package builds are in packages/games/dist/
