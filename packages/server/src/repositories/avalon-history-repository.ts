@@ -35,7 +35,14 @@ export class AvalonHistoryRepository {
       // 验证目录是否可写
       const testFile = `${dirPath}/.test`;
       await fs.writeFile(testFile, 'test', 'utf-8');
-      await fs.unlink(testFile);
+      try {
+        await fs.unlink(testFile);
+      } catch (unlinkError: any) {
+        // 忽略文件不存在的错误（可能被并发调用删除了）
+        if (unlinkError.code !== 'ENOENT') {
+          throw unlinkError;
+        }
+      }
       console.log(`[AvalonHistory] ✓ Directory is writable: ${dirPath}`);
     } catch (error) {
       console.error('[AvalonHistory] ❌ ERROR creating/writing to directory:', dirPath);
