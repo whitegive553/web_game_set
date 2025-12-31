@@ -180,6 +180,8 @@
     "goodWins": "善良阵营获胜！",
     "evilWins": "邪恶阵营获胜！",
     "backToLobby": "返回大厅",
+    "playAgain": "再来一局",
+    "resetting": "重置中...",
     "players": "玩家 ({{count}})",
     "online": "在线",
     "offline": "离线",

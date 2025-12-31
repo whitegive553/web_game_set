@@ -5,35 +5,48 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameHistoryEntry } from '@survival-game/shared';
+import { AvalonHistory } from './AvalonHistory';
 import './History.css';
+
+type HistoryTab = 'survival' | 'avalon';
 
 export const History: React.FC = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<HistoryTab>('avalon');
   const [history, setHistory] = useState<GameHistoryEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Changed to false - AvalonHistory manages its own loading
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadHistory();
-  }, []);
+    // Only load survival game history when that tab is active
+    if (activeTab === 'survival') {
+      loadHistory();
+    } else {
+      // For avalon tab, reset loading state since AvalonHistory manages its own
+      setLoading(false);
+      setError(null);
+    }
+  }, [activeTab]);
 
   const loadHistory = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/save/history', {
-        credentials: 'include',
-      });
+      // TODO: Update this URL when survival game history API is implemented
+      // For now, just set empty history to avoid 401 errors
+      setHistory([]);
+      setLoading(false);
 
-      if (!response.ok) {
-        throw new Error('Failed to load history');
-      }
-
-      const data = await response.json();
-      setHistory(data.data.history || []);
+      // const response = await fetch('/api/save/history', {
+      //   credentials: 'include',
+      // });
+      // if (!response.ok) {
+      //   throw new Error('Failed to load history');
+      // }
+      // const data = await response.json();
+      // setHistory(data.data.history || []);
     } catch (err) {
       console.error('Error loading history:', err);
       setError('无法加载历史记录');
-    } finally {
       setLoading(false);
     }
   };
@@ -120,19 +133,38 @@ export const History: React.FC = () => {
           <p className="header-subtitle">Game History</p>
         </div>
 
-        {error && (
-          <div className="error-message">{error}</div>
-        )}
+        <div className="history-tabs">
+          <button
+            className={`tab-button ${activeTab === 'avalon' ? 'active' : ''}`}
+            onClick={() => setActiveTab('avalon')}
+          >
+            🎲 阿瓦隆
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'survival' ? 'active' : ''}`}
+            onClick={() => setActiveTab('survival')}
+          >
+            🏕️ 生存游戏
+          </button>
+        </div>
 
-        {history.length === 0 && !error && (
-          <div className="empty-state">
-            <p className="empty-icon">📝</p>
-            <p>还没有游戏记录</p>
-            <p className="empty-hint">开始你的第一次探索吧！</p>
-          </div>
-        )}
+        {activeTab === 'avalon' ? (
+          <AvalonHistory />
+        ) : (
+          <>
+            {error && (
+              <div className="error-message">{error}</div>
+            )}
 
-        {history.length > 0 && (
+            {history.length === 0 && !error && (
+              <div className="empty-state">
+                <p className="empty-icon">📝</p>
+                <p>还没有游戏记录</p>
+                <p className="empty-hint">开始你的第一次探索吧！</p>
+              </div>
+            )}
+
+            {history.length > 0 && (
           <div className="history-list">
             {history.slice().reverse().map((entry, index) => (
               <div key={entry.runId} className="history-entry">
@@ -187,6 +219,8 @@ export const History: React.FC = () => {
               </div>
             ))}
           </div>
+            )}
+          </>
         )}
       </div>
     </div>

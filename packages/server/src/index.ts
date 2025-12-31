@@ -12,6 +12,7 @@ import authRoutes from './routes/auth-routes';
 import saveRoutes from './routes/save-routes';
 import gameLobbyRoutes from './routes/game-lobby-routes';
 import avalonRoutes from './routes/avalon-routes';
+import avalonHistoryRoutes from './routes/avalon-history-routes';
 import { initWebSocketService } from './services/websocket-service';
 
 // Load environment variables from packages/server/.env
@@ -71,6 +72,7 @@ app.use('/api/save', saveRoutes);
 app.use('/api/game', gameRoutes);
 app.use('/api/lobby', gameLobbyRoutes);
 app.use('/api/avalon', avalonRoutes);
+app.use('/api/avalon', avalonHistoryRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

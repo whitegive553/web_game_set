@@ -268,6 +268,31 @@ class RoomManager {
   }
 
   /**
+   * Reset room for "Play Again"
+   * Changes status from 'playing' or 'finished' back to 'lobby'
+   * Resets all players to not ready
+   * Clears match data
+   */
+  async resetRoom(roomId: string): Promise<Room> {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      throw new Error('Room not found');
+    }
+
+    // Reset room state
+    room.status = 'lobby';
+    room.match = undefined;
+    room.originalPlayers = undefined;
+    room.gameStartedAt = undefined;
+
+    // Reset all players to not ready
+    room.players.forEach(p => p.ready = false);
+
+    await this.persist();
+    return room;
+  }
+
+  /**
    * Delete room
    */
   async deleteRoom(roomId: string): Promise<void> {

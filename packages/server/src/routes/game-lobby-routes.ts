@@ -391,4 +391,59 @@ router.delete('/rooms/:roomId', requireAuth, async (req: Request, res: Response)
   }
 });
 
+/**
+ * POST /api/lobby/rooms/:roomId/reset
+ * Reset room for "Play Again" - returns to lobby state
+ */
+router.post('/rooms/:roomId/reset', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { roomId } = req.params;
+    const userId = req.user!.id;
+
+    const roomManager = getRoomManager();
+    const room = roomManager.getRoom(roomId);
+
+    if (!room) {
+      res.status(404).json({
+        success: false,
+        error: 'Room not found'
+      });
+      return;
+    }
+
+    // Only host or participants can reset the room
+    const isParticipant = room.players.some(p => p.userId === userId);
+    if (!isParticipant && room.hostUserId !== userId) {
+      res.status(403).json({
+        success: false,
+        error: 'You are not in this room'
+      });
+      return;
+    }
+
+    // Reset the room
+    const updatedRoom = await roomManager.resetRoom(roomId);
+
+    // Broadcast room update to all players
+    const wsService = getWebSocketService();
+    wsService.broadcastToRoom(roomId, {
+      type: 'ROOM_RESET',
+      payload: { room: updatedRoom }
+    });
+
+    console.log(`[Lobby] Room ${roomId} reset for play again by ${userId}`);
+
+    res.json({
+      success: true,
+      data: { room: updatedRoom }
+    });
+  } catch (error) {
+    console.error('[Lobby] Reset room error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to reset room'
+    });
+  }
+});
+
 export default router;

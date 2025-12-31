@@ -32,6 +32,9 @@ RUN echo "=== Building shared package ===" && \
     echo "=== Building game-engine package ===" && \
     npm run build --workspace=packages/game-engine && \
     ls -la packages/game-engine/dist/ && \
+    echo "=== Building games ===" && \
+    cd games && npx tsc && cd .. && \
+    ls -la games/dist/ && \
     echo "=== Building server package ===" && \
     npm run build --workspace=packages/server && \
     ls -la packages/server/dist/
@@ -40,31 +43,19 @@ RUN echo "=== Building shared package ===" && \
 RUN echo "=== Verifying build outputs ===" && \
     test -f packages/shared/dist/index.js && echo "✓ shared build OK" && \
     test -f packages/game-engine/dist/index.js && echo "✓ game-engine build OK" && \
+    test -f games/dist/avalon/avalon-game.js && echo "✓ games build OK" && \
     echo "=== Checking server build structure ===" && \
     find packages/server/dist -name "index.js" -type f && \
     echo "=== Flattening server dist structure ===" && \
     if [ -d packages/server/dist/packages/server/src ]; then \
         cp -r packages/server/dist/packages/server/src/* packages/server/dist/ && \
         rm -rf packages/server/dist/packages && \
-        rm -rf packages/server/dist/games && \
         echo "✓ server build structure fixed"; \
     fi && \
     test -f packages/server/dist/index.js && echo "✓ server build OK" || \
     (echo "ERROR: Build verification failed" && exit 1)
 
-# 编译 Avalon 游戏逻辑（忽略类型错误，仅生成 JS）
-WORKDIR /app/games/avalon
-RUN npx tsc avalon-game.ts \
-    --skipLibCheck \
-    --noEmitOnError false \
-    --module commonjs \
-    --target es2020 \
-    --outDir . \
-    --resolveJsonModule \
-    --esModuleInterop \
-    --moduleResolution node || echo "TypeScript compilation completed with warnings" && \
-    test -f avalon-game.js && echo "✓ avalon-game.js generated" || \
-    (echo "ERROR: avalon-game.js not found" && exit 1)
+WORKDIR /app
 
 # 生产阶段
 FROM base AS production

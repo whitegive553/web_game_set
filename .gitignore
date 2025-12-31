@@ -44,3 +44,6 @@ coverage/
 
 # Vite
 .vite/
+
+# Runtime data (user data, game states, history records)
+packages/server/data/

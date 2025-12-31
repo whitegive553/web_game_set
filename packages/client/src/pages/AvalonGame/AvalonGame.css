@@ -693,7 +693,15 @@
   text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
 }
 
-.btn-back-lobby {
+.game-over-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.btn-back-lobby,
+.btn-play-again {
   padding: 15px 40px;
   font-size: 1.1rem;
   font-weight: bold;
@@ -705,9 +713,23 @@
   transition: all 0.3s ease;
 }
 
-.btn-back-lobby:hover {
+.btn-play-again {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.btn-back-lobby:hover,
+.btn-play-again:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-play-again:hover:not(:disabled) {
+  box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+}
+
+.btn-play-again:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* ====================

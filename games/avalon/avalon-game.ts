@@ -25,18 +25,38 @@ import {
 } from '@survival-game/shared';
 import gameConfig from './config.json';
 
+// Type for history service to avoid circular dependency
+export interface IAvalonHistoryService {
+  onGameStart(matchId: string, gameData: any): Promise<void>;
+  onRoundStart(gameId: string, roundData: any): Promise<void>;
+  onTeamProposal(gameId: string, proposalData: any): Promise<void>;
+  onTeamVote(gameId: string, voteData: any): Promise<void>;
+  onQuestResolved(gameId: string, questData: any): Promise<void>;
+  onAssassination(gameId: string, assassinationData: any): Promise<void>;
+  onGameEnd(gameData: any): Promise<void>;
+}
+
 export class AvalonGame {
   private match: GameMatch;
   private state: AvalonGameState;
   private config: PlayerCountConfig;
   private events: PluginGameEvent[] = [];
+  private roomId: string;
+  private gameStartedAt?: number;
+  private historyService?: IAvalonHistoryService;
 
   /**
    * @param match - The game match
    * @param customConfig - Optional custom role configuration (overrides default config.json)
+   * @param historyService - Optional history service for recording game events
    */
-  constructor(match: GameMatch, customConfig?: AvalonRoomConfig) {
+  constructor(match: GameMatch, customConfig?: AvalonRoomConfig, historyService?: IAvalonHistoryService) {
+    console.log('[AvalonGame] >>>>>> CONSTRUCTOR CALLED WITH VERSION 2024-12-31 <<<<<<');
+    console.log('[AvalonGame] >>>>>> historyService parameter:', historyService ? 'PROVIDED' : 'UNDEFINED');
+    this.historyService = historyService;
+    console.log('[AvalonGame] >>>>>> this.historyService set to:', this.historyService ? 'OK' : 'UNDEFINED');
     this.match = match;
+    this.roomId = match.roomId;
     const playerCount = match.players.length;
 
     // Use custom config if provided, otherwise fall back to config.json
@@ -140,6 +160,7 @@ export class AvalonGame {
 
     // Move to role reveal phase
     this.state.phase = AvalonPhase.ROLE_REVEAL;
+    this.gameStartedAt = Date.now();
 
     const event: PluginGameEvent = {
       eventId: `event_${Date.now()}`,
@@ -155,6 +176,19 @@ export class AvalonGame {
 
     // Sync state to match for persistence
     this.syncStateToMatch();
+
+    // Record game start in history
+    console.log('[AvalonGame] >>>>>> historyService exists?', !!this.historyService);
+    console.log('[AvalonGame] >>>>>> Calling historyService.onGameStart');
+    this.historyService?.onGameStart(this.match.matchId, {
+      gameId: this.match.matchId,
+      roomId: this.roomId,
+      createdAt: this.match.createdAt,
+      startedAt: this.gameStartedAt,
+      players: this.match.players.map(p => ({ userId: p.userId, username: p.username })),
+      roleAssignments: this.state.roleAssignments,
+      config: this.config
+    }).catch(err => console.error('[AvalonHistory] Failed to record game start:', err));
 
     // Automatically move to nomination after players have seen their roles
     // Changed from 3 seconds to 8 seconds to allow for 5-second countdown + role reveal
@@ -207,6 +241,16 @@ export class AvalonGame {
 
     this.events.push(event);
     this.syncStateToMatch();
+
+    // Record round start in history (only when starting a new quest)
+    if (incrementRound) {
+      this.historyService?.onRoundStart(this.match.matchId, {
+        round: this.state.round,
+        leaderUserId: this.state.leader,
+        leaderIndex: this.state.leaderIndex
+      }).catch(err => console.error('[AvalonHistory] Failed to record round start:', err));
+    }
+
     return [event];
   }
 
@@ -255,6 +299,16 @@ export class AvalonGame {
 
     this.events.push(event);
     this.syncStateToMatch();
+
+    // Record team proposal in history
+    this.historyService?.onTeamProposal(this.match.matchId, {
+      round: this.state.round,
+      proposalIndex: this.state.currentQuestTeamVotes.length,
+      leaderSeat: this.state.leaderIndex,
+      teamUserIds,
+      players: this.match.players
+    }).catch(err => console.error('[AvalonHistory] Failed to record team proposal:', err));
+
     return [event];
   }
 
@@ -315,6 +369,15 @@ export class AvalonGame {
         visibleTo: 'all',
       });
 
+      // Record team vote in history
+      this.historyService?.onTeamVote(this.match.matchId, {
+        round: this.state.round,
+        proposalIndex: this.state.currentQuestTeamVotes.length - 1, // We just pushed to the array
+        teamVotes: this.state.teamVotes,
+        players: this.match.players,
+        passed: majority
+      }).catch(err => console.error('[AvalonHistory] Failed to record team vote:', err));
+
       if (majority) {
         // Team approved, move to quest
         this.state.phase = AvalonPhase.QUEST_VOTE;
@@ -342,7 +405,7 @@ export class AvalonGame {
     return events;
   }
 
-  public handleVoteQuest(userId: string, success: boolean): PluginGameEvent[] {
+  public async handleVoteQuest(userId: string, success: boolean): Promise<PluginGameEvent[]> {
     if (this.state.phase !== AvalonPhase.QUEST_VOTE) {
       throw new Error('Not in quest vote phase');
     }
@@ -414,6 +477,16 @@ export class AvalonGame {
         visibleTo: 'all',
       });
 
+      // Record quest resolution in history
+      this.historyService?.onQuestResolved(this.match.matchId, {
+        round: this.state.round,
+        teamUserIds: this.state.nominatedTeam,
+        players: this.match.players,
+        successVotes,
+        failVotes,
+        questSuccess
+      }).catch(err => console.error('[AvalonHistory] Failed to record quest resolution:', err));
+
       // Check win conditions
       if (this.state.goodWins >= 3) {
         // Good needs to survive assassination
@@ -422,7 +495,7 @@ export class AvalonGame {
       } else if (this.state.evilWins >= 3) {
         // Evil wins
         this.syncStateToMatch();
-        return events.concat(this.endGame(AvalonTeam.EVIL, 'Three quests failed'));
+        return events.concat(await this.endGame(AvalonTeam.EVIL, 'Three quests failed'));
       } else {
         // Continue to next quest
         this.advanceLeader();
@@ -436,7 +509,7 @@ export class AvalonGame {
     return events;
   }
 
-  public handleAssassinate(userId: string, targetUserId: string): PluginGameEvent[] {
+  public async handleAssassinate(userId: string, targetUserId: string): Promise<PluginGameEvent[]> {
     if (this.state.phase !== AvalonPhase.ASSASSINATION) {
       throw new Error('Not in assassination phase');
     }
@@ -465,10 +538,19 @@ export class AvalonGame {
       visibleTo: 'all',
     }];
 
+    // Record assassination in history
+    this.historyService?.onAssassination(this.match.matchId, {
+      assassinUserId: userId,
+      targetUserId,
+      targetRole,
+      success: hitMerlin,
+      players: this.match.players
+    }).catch(err => console.error('[AvalonHistory] Failed to record assassination:', err));
+
     if (hitMerlin) {
-      return events.concat(this.endGame(AvalonTeam.EVIL, 'Merlin assassinated'));
+      return events.concat(await this.endGame(AvalonTeam.EVIL, 'Merlin assassinated'));
     } else {
-      return events.concat(this.endGame(AvalonTeam.GOOD, 'Merlin survived'));
+      return events.concat(await this.endGame(AvalonTeam.GOOD, 'Merlin survived'));
     }
   }
 
@@ -490,7 +572,7 @@ export class AvalonGame {
     return [event];
   }
 
-  private endGame(winner: AvalonTeam, reason: string): PluginGameEvent[] {
+  private async endGame(winner: AvalonTeam, reason: string): Promise<PluginGameEvent[]> {
     this.state.phase = AvalonPhase.GAME_OVER;
     this.state.winner = winner;
 
@@ -513,6 +595,28 @@ export class AvalonGame {
 
     // Sync final state to match
     this.syncStateToMatch();
+
+    // Record game end in history - WAIT for it to complete
+    try {
+      await this.historyService?.onGameEnd({
+        gameId: this.match.matchId,
+        matchId: this.match.matchId,
+        roomId: this.roomId,
+        createdAt: this.match.createdAt,
+        startedAt: this.gameStartedAt || this.match.createdAt,
+        endedAt: this.match.endedAt,
+        players: this.match.players.map(p => ({ userId: p.userId, username: p.username })),
+        roleAssignments: this.state.roleAssignments,
+        winner,
+        reason,
+        goodScore: this.state.goodWins,
+        evilScore: this.state.evilWins,
+        config: this.config
+      });
+      console.log('[AvalonHistory] Game end recorded successfully');
+    } catch (err) {
+      console.error('[AvalonHistory] Failed to record game end:', err);
+    }
 
     return [event];
   }

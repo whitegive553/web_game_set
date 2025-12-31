@@ -15,6 +15,10 @@ import {
   roleConfigToPlayerCountConfig
 } from '@survival-game/shared';
 import { AvalonGame } from '../../../../games/avalon/avalon-game';
+import { avalonHistoryService } from '../services/avalon-history-service';
+
+console.log('[AvalonRoutes] Module loaded, AvalonGame:', AvalonGame ? 'OK' : 'FAILED');
+console.log('[AvalonRoutes] avalonHistoryService loaded:', avalonHistoryService ? 'OK' : 'FAILED');
 
 const router = Router();
 
@@ -274,8 +278,8 @@ router.post('/:roomId/start', requireAuth, async (req: Request, res: Response) =
       createdAt: Date.now()
     };
 
-    // Initialize game instance with custom config
-    const avalonGame = new AvalonGame(match, avalonConfig);
+    // Initialize game instance with custom config and history service
+    const avalonGame = new AvalonGame(match, avalonConfig, avalonHistoryService);
     activeGames.set(matchId, avalonGame);
 
     console.log(`[Avalon] Starting game with config:`, avalonConfig);
@@ -284,7 +288,9 @@ router.post('/:roomId/start', requireAuth, async (req: Request, res: Response) =
     await roomManager.startGame(roomId, match);
 
     // Start the game
+    console.log('[Avalon] ===== CALLING avalonGame.startGame() =====');
     const events = avalonGame.startGame();
+    console.log('[Avalon] ===== startGame() returned, events count:', events.length);
 
     // Send events via WebSocket
     const wsService = getWebSocketService();
@@ -369,11 +375,11 @@ router.post('/:matchId/action', requireAuth, async (req: Request, res: Response)
         break;
 
       case 'VOTE_QUEST':
-        events = avalonGame.handleVoteQuest(userId, payload.success);
+        events = await avalonGame.handleVoteQuest(userId, payload.success);
         break;
 
       case 'ASSASSINATE':
-        events = avalonGame.handleAssassinate(userId, payload.targetUserId);
+        events = await avalonGame.handleAssassinate(userId, payload.targetUserId);
         break;
 
       default:
@@ -442,7 +448,7 @@ router.get('/:matchId/state', requireAuth, async (req: Request, res: Response) =
       // Check if this is still an active game
       if (room.status === 'playing') {
         try {
-          avalonGame = new AvalonGame(room.match);
+          avalonGame = new AvalonGame(room.match, undefined, avalonHistoryService);
           activeGames.set(matchId, avalonGame);
           console.log(`[Avalon] Successfully recreated game instance for match ${matchId}`);
         } catch (error) {
@@ -468,7 +474,8 @@ router.get('/:matchId/state', requireAuth, async (req: Request, res: Response) =
       data: {
         publicState,
         privateState,
-        players: room?.players || []
+        players: room?.players || [],
+        roomId: room?.roomId
       }
     });
   } catch (error) {

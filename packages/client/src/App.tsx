@@ -16,6 +16,7 @@ import { SceneDemoPage } from './pages/SceneDemo/SceneDemoPage';
 import { GameLobby } from './pages/GameLobby/GameLobby';
 import { AvalonRoom } from './pages/AvalonRoom/AvalonRoom';
 import { AvalonGame } from './pages/AvalonGame/AvalonGame';
+import { AvalonGameDetail } from './pages/History/AvalonGameDetail';
 import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
 import './i18n/config'; // Initialize i18n
 import './App.css';
@@ -59,10 +60,26 @@ function App() {
               }
             />
             <Route
+              path="/history"
+              element={
+                <ProtectedRoute>
+                  <History />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/game/history"
               element={
                 <ProtectedRoute>
                   <History />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/avalon/history/:gameId"
+              element={
+                <ProtectedRoute>
+                  <AvalonGameDetail />
                 </ProtectedRoute>
               }
             />

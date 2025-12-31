@@ -8,11 +8,12 @@ import './QuestCard.css';
 
 interface QuestCardProps {
   questNumber: number;
+  teamSize: number;
   result?: QuestResult;
   getPlayerName: (userId: string) => string;
 }
 
-export const QuestCard: React.FC<QuestCardProps> = ({ questNumber, result, getPlayerName }) => {
+export const QuestCard: React.FC<QuestCardProps> = ({ questNumber, teamSize, result, getPlayerName }) => {
   const [flipped, setFlipped] = useState(false);
 
   const handleClick = () => {
@@ -30,7 +31,7 @@ export const QuestCard: React.FC<QuestCardProps> = ({ questNumber, result, getPl
       <div className="quest-card-inner">
         {/* Front of card */}
         <div className="quest-card-front">
-          <div className="quest-number">{questNumber}</div>
+          <div className="quest-number">{teamSize}</div>
           {result && (
             <div className={`quest-result ${result.success ? 'success' : 'fail'}`}>
               {result.success ? '✓' : '✗'}

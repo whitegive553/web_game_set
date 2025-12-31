@@ -60,6 +60,8 @@ export const AvalonGame: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [roomId, setRoomId] = useState<string | null>(null);
+  const [isResetting, setIsResetting] = useState(false);
 
   // Game start states
   const [countdown, setCountdown] = useState(5);
@@ -148,6 +150,7 @@ export const AvalonGame: React.FC = () => {
         setPrivateState(data.data.privateState);
         const playersData = data.data.players || [];
         setPlayers(playersData);
+        setRoomId(data.data.roomId);
         console.log('[AvalonGame] Fetched state - players:', playersData.length, playersData);
       } else if (response.status === 404 || data.gameEnded) {
         // Game not found or ended, redirect to lobby
@@ -258,6 +261,35 @@ export const AvalonGame: React.FC = () => {
     navigate('/lobby');
   };
 
+  const handlePlayAgain = async () => {
+    if (!token || !roomId) return;
+
+    setIsResetting(true);
+    try {
+      const response = await fetch(`${API_CONFIG.LOBBY_API}/rooms/${roomId}/reset`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        console.log('[AvalonGame] Room reset successfully, navigating to room');
+        // Navigate back to the room
+        navigate(`/lobby/avalon/${roomId}`);
+      } else {
+        setError('重置房间失败');
+      }
+    } catch (error) {
+      console.error('[AvalonGame] Error resetting room:', error);
+      setError('重置房间失败');
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   const getTeamSize = () => {
     const teamSizes: Record<number, number[]> = {
       6: [2, 3, 4, 3, 4],
@@ -271,13 +303,27 @@ export const AvalonGame: React.FC = () => {
     return teamSizes[playerCount]?.[publicState?.round ? publicState.round - 1 : 0] || 2;
   };
 
+  const getQuestTeamSize = (questNumber: number) => {
+    const teamSizes: Record<number, number[]> = {
+      6: [2, 3, 4, 3, 4],
+      7: [2, 3, 3, 4, 4],
+      8: [3, 4, 4, 5, 5],
+      9: [3, 4, 4, 5, 5],
+      10: [3, 4, 4, 5, 5]
+    };
+
+    const playerCount = players.length || 6;
+    return teamSizes[playerCount]?.[questNumber - 1] || 2;
+  };
+
   const getPlayerName = (userId: string): string => {
     const player = players.find(p => p.userId === userId);
     return player?.username || userId;
   };
 
   const getRoleDisplayName = (role: string): string => {
-    const roleKey = role.replace('_', '');
+    // Convert snake_case to camelCase
+    const roleKey = role.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
     const displayName = t(`avalonConfig.roles.${roleKey}`, { defaultValue: role });
     console.log('[AvalonGame] Role display:', role, '->', displayName);
     return displayName;
@@ -492,6 +538,7 @@ export const AvalonGame: React.FC = () => {
                   <QuestCard
                     key={questNum}
                     questNumber={questNum}
+                    teamSize={getQuestTeamSize(questNum)}
                     result={result}
                     getPlayerName={getPlayerName}
                   />
@@ -630,9 +677,18 @@ export const AvalonGame: React.FC = () => {
               <div className="winner-reason">
                 {publicState.winReason && <p>{publicState.winReason}</p>}
               </div>
-              <button onClick={() => navigate('/lobby')} className="btn-back-lobby">
-                {t('avalonGame.backToLobby')}
-              </button>
+              <div className="game-over-buttons">
+                <button
+                  onClick={handlePlayAgain}
+                  className="btn-play-again"
+                  disabled={isResetting || !roomId}
+                >
+                  {isResetting ? t('avalonGame.resetting') : t('avalonGame.playAgain')}
+                </button>
+                <button onClick={() => navigate('/lobby')} className="btn-back-lobby">
+                  {t('avalonGame.backToLobby')}
+                </button>
+              </div>
             </div>
           )}
         </div>

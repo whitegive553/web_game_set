@@ -1,11 +1,11 @@
 {
   "name": "@survival-game/server",
   "version": "0.1.0",
-  "main": "dist/index.js",
+  "main": "dist/packages/server/src/index.js",
   "scripts": {
-    "dev": "ts-node src/index.ts",
+    "dev": "ts-node --transpile-only src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/packages/server/src/index.js"
   },
   "dependencies": {
     "@survival-game/game-engine": "*",

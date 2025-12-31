@@ -23,6 +23,49 @@
   text-shadow: 0 0 20px rgba(74, 158, 255, 0.5);
 }
 
+.history-tabs {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 30px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
+}
+
+.tab-button {
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 16px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 8px 8px 0 0;
+  position: relative;
+}
+
+.tab-button:hover {
+  color: #e0e0e0;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-button.active {
+  color: #4a9eff;
+  background: rgba(74, 158, 255, 0.1);
+  font-weight: 600;
+}
+
+.tab-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #4a9eff;
+  box-shadow: 0 0 10px rgba(74, 158, 255, 0.8);
+}
+
 .loading {
   text-align: center;
   padding: 100px 20px;
