@@ -1,11 +1,27 @@
 {
   "gameId": "avalon",
   "displayName": "The Resistance: Avalon",
-  "minPlayers": 6,
+  "minPlayers": 5,
   "maxPlayers": 10,
   "questsToWin": 3,
 
   "playerConfigs": {
+    "5": {
+      "totalPlayers": 5,
+      "goodCount": 3,
+      "evilCount": 2,
+      "roles": {
+        "good": ["merlin", "percival", "loyal_servant"],
+        "evil": ["assassin", "morgana"]
+      },
+      "quests": [
+        { "questNumber": 1, "teamSize": 2, "failsRequired": 1 },
+        { "questNumber": 2, "teamSize": 3, "failsRequired": 1 },
+        { "questNumber": 3, "teamSize": 2, "failsRequired": 1 },
+        { "questNumber": 4, "teamSize": 3, "failsRequired": 1 },
+        { "questNumber": 5, "teamSize": 3, "failsRequired": 1 }
+      ]
+    },
     "6": {
       "totalPlayers": 6,
       "goodCount": 4,

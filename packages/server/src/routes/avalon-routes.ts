@@ -86,10 +86,10 @@ router.post('/:roomId/config', requireAuth, async (req: Request, res: Response) 
 
     // Update target player count if provided
     if (targetPlayerCount !== undefined) {
-      if (targetPlayerCount < 6 || targetPlayerCount > 10) {
+      if (targetPlayerCount < 5 || targetPlayerCount > 10) {
         res.status(400).json({
           success: false,
-          error: 'Player count must be between 6 and 10'
+          error: 'Player count must be between 5 and 10'
         });
         return;
       }
@@ -206,11 +206,11 @@ router.post('/:roomId/start', requireAuth, async (req: Request, res: Response) =
       return;
     }
 
-    // Check player count (6-10 for Avalon)
-    if (room.players.length < 6 || room.players.length > 10) {
+    // Check player count (5-10 for Avalon)
+    if (room.players.length < 5 || room.players.length > 10) {
       res.status(400).json({
         success: false,
-        error: 'Avalon requires 6-10 players'
+        error: 'Avalon requires 5-10 players'
       });
       return;
     }

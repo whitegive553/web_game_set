@@ -26,6 +26,7 @@ interface PlayerCountRequirements {
 }
 
 export const PLAYER_COUNT_REQUIREMENTS: Record<number, PlayerCountRequirements> = {
+  5: { total: 5, good: 3, evil: 2 },
   6: { total: 6, good: 4, evil: 2 },
   7: { total: 7, good: 4, evil: 3 },
   8: { total: 8, good: 5, evil: 3 },
@@ -38,6 +39,13 @@ export const PLAYER_COUNT_REQUIREMENTS: Record<number, PlayerCountRequirements> 
 // ============================================================================
 
 export const QUEST_CONFIGURATIONS: Record<number, QuestConfig[]> = {
+  5: [
+    { questNumber: 1, teamSize: 2, failsRequired: 1 },
+    { questNumber: 2, teamSize: 3, failsRequired: 1 },
+    { questNumber: 3, teamSize: 2, failsRequired: 1 },
+    { questNumber: 4, teamSize: 3, failsRequired: 1 },
+    { questNumber: 5, teamSize: 3, failsRequired: 1 },
+  ],
   6: [
     { questNumber: 1, teamSize: 2, failsRequired: 1 },
     { questNumber: 2, teamSize: 3, failsRequired: 1 },
@@ -80,6 +88,16 @@ export const QUEST_CONFIGURATIONS: Record<number, QuestConfig[]> = {
 // ============================================================================
 
 export const DEFAULT_ROLE_CONFIGURATIONS: Record<number, RoleConfiguration> = {
+  5: {
+    merlin: 1,
+    percival: 1,
+    loyalServant: 1,
+    assassin: 1,
+    morgana: 1,
+    mordred: 0,
+    oberon: 0,
+    minion: 0,
+  },
   6: {
     merlin: 1,
     percival: 1,
@@ -145,9 +163,9 @@ export function validateRoleConfiguration(
 ): RoleConfigValidation {
   const errors: string[] = [];
 
-  // Check player count is supported (6-10 only)
-  if (playerCount < 6 || playerCount > 10) {
-    errors.push(`Player count must be between 6 and 10 (got ${playerCount})`);
+  // Check player count is supported (5-10 only)
+  if (playerCount < 5 || playerCount > 10) {
+    errors.push(`Player count must be between 5 and 10 (got ${playerCount})`);
     return { valid: false, errors };
   }
 
@@ -213,7 +231,7 @@ export function validateRoleConfiguration(
  * Gets the default room configuration for a given player count
  */
 export function getDefaultRoomConfig(playerCount: number): AvalonRoomConfig | null {
-  if (playerCount < 6 || playerCount > 10) {
+  if (playerCount < 5 || playerCount > 10) {
     return null;
   }
 
@@ -227,7 +245,7 @@ export function getDefaultRoomConfig(playerCount: number): AvalonRoomConfig | nu
  * Gets the full player count configuration (roles + quests)
  */
 export function getPlayerCountConfig(playerCount: number): PlayerCountConfig | null {
-  if (playerCount < 6 || playerCount > 10) {
+  if (playerCount < 5 || playerCount > 10) {
     return null;
   }
 

@@ -33,7 +33,7 @@ router.post('/rooms', requireAuth, async (req: Request, res: Response) => {
     const room = await roomManager.createRoom(gameId, userId, name, maxPlayers);
 
     // Initialize default Avalon configuration if this is an Avalon game
-    if (gameId === 'avalon' && maxPlayers >= 6 && maxPlayers <= 10) {
+    if (gameId === 'avalon' && maxPlayers >= 5 && maxPlayers <= 10) {
       const defaultConfig = getDefaultRoomConfig(maxPlayers);
       if (defaultConfig) {
         await roomManager.updateAvalonConfig(room.roomId, userId, defaultConfig);

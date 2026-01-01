@@ -40,6 +40,7 @@ interface Props {
 
 // 标准配置要求
 const PLAYER_COUNT_REQUIREMENTS: Record<number, { good: number; evil: number }> = {
+  5: { good: 3, evil: 2 },
   6: { good: 4, evil: 2 },
   7: { good: 4, evil: 3 },
   8: { good: 5, evil: 3 },
@@ -72,7 +73,7 @@ export const AvalonRoomConfig: React.FC<Props> = ({
     const { roleConfig, targetPlayerCount } = cfg;
 
     // 检查人数范围
-    if (targetPlayerCount < 6 || targetPlayerCount > 10) {
+    if (targetPlayerCount < 5 || targetPlayerCount > 10) {
       errors.push(t('avalonConfig.validation.playerCountRange'));
     }
 
@@ -183,7 +184,7 @@ export const AvalonRoomConfig: React.FC<Props> = ({
         <div className="config-label">{t('avalonConfig.targetPlayerCount')}</div>
         {isEditing ? (
           <div className="player-count-selector">
-            {[6, 7, 8, 9, 10].map(count => (
+            {[5, 6, 7, 8, 9, 10].map(count => (
               <button
                 key={count}
                 className={`count-option ${targetPlayerCount === count ? 'selected' : ''}`}
