@@ -4,6 +4,7 @@
  */
 
 import { avalonHistoryRepository } from '../repositories/avalon-history-repository';
+import { avalonAchievementService } from './avalon-achievement-service';
 import {
   AvalonGameRecord,
   AvalonParticipantsRecord,
@@ -335,6 +336,13 @@ export class AvalonHistoryService {
     }
 
     console.log(`[AvalonHistory] Game ${gameData.gameId} fully recorded`);
+
+    // 检查成就（异步，不阻塞游戏流程）
+    avalonAchievementService.checkAchievementsOnGameEnd(
+      gameData.players.map(p => ({ userId: p.userId, username: p.username }))
+    ).catch(error => {
+      console.error('[AvalonHistory] Error checking achievements:', error);
+    });
   }
 
   /**
