@@ -22,8 +22,12 @@ export const Achievements: React.FC = () => {
   const loadAchievements = async () => {
     try {
       setLoading(true);
+      const token = localStorage.getItem('auth_token');
       const response = await fetch('/api/save/achievements', {
         credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
