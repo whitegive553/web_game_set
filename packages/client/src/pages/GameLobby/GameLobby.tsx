@@ -425,8 +425,8 @@ export const GameLobby: React.FC = () => {
                 <input
                   type="number"
                   value={maxPlayers}
-                  onChange={e => setMaxPlayers(Math.min(10, Math.max(6, parseInt(e.target.value) || 6)))}
-                  min={6}
+                  onChange={e => setMaxPlayers(Math.min(10, Math.max(5, parseInt(e.target.value) || 6)))}
+                  min={5}
                   max={10}
                 />
               </div>
