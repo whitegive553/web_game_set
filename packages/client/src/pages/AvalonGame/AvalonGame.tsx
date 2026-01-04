@@ -591,7 +591,7 @@ export const AvalonGame: React.FC = () => {
               )}
 
               {/* Blade Strike Buttons - Only show if role card is flipped and game is active */}
-              {roleCardFlipped && publicState.phase !== 'LOBBY' && publicState.phase !== 'GAME_OVER' && !publicState.bladeStrikeActive && (
+              {roleCardFlipped && publicState.phase !== 'LOBBY' && publicState.phase !== 'ROLE_REVEAL' && publicState.phase !== 'GAME_OVER' && !publicState.bladeStrikeActive && (
                 <>
                   {/* Assassin: Direct blade strike button */}
                   {privateState.role === 'assassin' && (
@@ -607,7 +607,7 @@ export const AvalonGame: React.FC = () => {
                   )}
 
                   {/* Non-assassin evil: Request blade strike button */}
-                  {privateState.team === 'evil' && privateState.role !== 'assassin' && !publicState.bladeStrikeRequests.includes(user?.id || '') && (
+                  {privateState.team === 'evil' && privateState.role !== 'assassin' && !(publicState.bladeStrikeRequests?.includes(user?.id || '') ?? false) && (
                     <button
                       className="blade-strike-button request"
                       onClick={(e) => {
