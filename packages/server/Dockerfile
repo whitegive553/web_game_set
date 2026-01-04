@@ -38,20 +38,10 @@ RUN echo "=== Building dependencies ===" && \
     npm run build --workspace=packages/games && \
     echo "✓ games build OK"
 
-# 立即调整 games 构建产物结构（在构建 server 之前）
-RUN echo "=== Fixing games dist structure ===" && \
-    if [ -d packages/games/dist/games/src ]; then \
-        echo "Found nested structure, flattening..." && \
-        cp -r packages/games/dist/games/src/* packages/games/dist/ && \
-        rm -rf packages/games/dist/games && \
-        echo "✓ games structure flattened"; \
-    fi && \
-    if [ -d packages/games/dist/shared ]; then \
-        rm -rf packages/games/dist/shared && \
-        echo "✓ removed shared dir"; \
-    fi && \
-    test -f packages/games/dist/index.js && echo "✓ games/dist/index.js exists" || \
-    (echo "ERROR: games/dist/index.js not found" && ls -la packages/games/dist/ && exit 1)
+# 验证 games 构建产物
+RUN echo "=== Verifying games dist structure ===" && \
+    test -f packages/games/dist/games/src/index.js && echo "✓ games/dist/games/src/index.js exists" || \
+    (echo "ERROR: games/dist/games/src/index.js not found" && ls -la packages/games/dist/ && exit 1)
 
 # 现在构建 server（依赖已准备好）
 RUN echo "=== Building server ===" && \
@@ -62,7 +52,7 @@ RUN echo "=== Building server ===" && \
 RUN echo "=== Verifying build outputs ===" && \
     test -f packages/shared/dist/index.js && echo "✓ shared verified" && \
     test -f packages/game-engine/dist/index.js && echo "✓ game-engine verified" && \
-    test -f packages/games/dist/index.js && echo "✓ games verified" && \
+    test -f packages/games/dist/games/src/index.js && echo "✓ games verified" && \
     test -f packages/server/dist/index.js && echo "✓ server verified" || \
     (echo "ERROR: Build verification failed" && \
      echo "=== server/dist contents ===" && ls -la packages/server/dist/ && \
