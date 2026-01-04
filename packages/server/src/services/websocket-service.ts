@@ -296,19 +296,25 @@ export class WebSocketService {
    */
   public sendGameEvents(roomId: string, events: PluginGameEvent[]): void {
     const roomClients = this.roomClients.get(roomId);
+    console.log(`[WS] sendGameEvents to room ${roomId}, clients:`, roomClients ? Array.from(roomClients) : 'NO CLIENTS');
     if (!roomClients) {
+      console.warn(`[WS] No clients found for room ${roomId}`);
       return;
     }
 
     events.forEach(event => {
+      console.log(`[WS] Processing event type: ${event.type}, visibleTo: ${event.visibleTo}`);
       if (event.visibleTo === 'all') {
         // Broadcast to all players in room
+        console.log(`[WS] Broadcasting ${event.type} to all players in room ${roomId}`);
         this.broadcastEventToRoom(roomId, event);
       } else if (event.visibleTo === 'player' && event.userId) {
         // Send to specific player only
+        console.log(`[WS] Sending ${event.type} to player ${event.userId}`);
         this.sendEventToPlayer(event.userId, event);
       } else if (Array.isArray(event.visibleTo)) {
         // Send to specific list of players
+        console.log(`[WS] Sending ${event.type} to ${event.visibleTo.length} specific players`);
         event.visibleTo.forEach(userId => {
           this.sendEventToPlayer(userId, event);
         });

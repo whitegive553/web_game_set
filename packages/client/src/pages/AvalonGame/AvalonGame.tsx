@@ -121,10 +121,17 @@ export const AvalonGame: React.FC = () => {
   // Listen to WebSocket events
   useEffect(() => {
     const wsClient = getWebSocketClient();
-    if (!wsClient) return;
+    if (!wsClient) {
+      console.warn('[AvalonGame] WebSocket client not available');
+      return;
+    }
+
+    console.log('[AvalonGame] Setting up WebSocket event listeners');
 
     const handleGameEvent = (payload: any) => {
-      console.log('[AvalonGame] Game event:', payload);
+      console.log('[AvalonGame] ===== GAME_EVENT RECEIVED =====');
+      console.log('[AvalonGame] Event type:', payload?.type);
+      console.log('[AvalonGame] Full payload:', payload);
 
       // Handle blade strike events
       if (payload.type === 'BLADE_STRIKE_REQUESTED') {

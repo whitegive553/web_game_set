@@ -176,6 +176,7 @@ export class WebSocketClient {
    */
   private handleMessage(message: any): void {
     const { type, payload } = message;
+    console.log(`[WS Client] Received message type: ${type}`, payload);
     this.emit(type, payload);
   }
 
