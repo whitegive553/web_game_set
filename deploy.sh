@@ -163,7 +163,8 @@ print_step "5/8 构建 Docker 镜像"
 
 print_warn "首次构建可能需要 10-15 分钟，请耐心等待..."
 
-if $DOCKER_COMPOSE_CMD build; then
+# 添加 --no-cache 参数强制重新构建，避免使用旧的缓存层
+if $DOCKER_COMPOSE_CMD build --no-cache; then
     print_info "镜像构建成功"
 else
     print_error "镜像构建失败，请检查日志"
