@@ -85,6 +85,9 @@ export interface AvalonGameState {
     questVotes: Record<string, boolean>;
     currentQuestTeamVotes: TeamVoteHistory[];
     assassinTarget?: string;
+    bladeStrikeRequests: string[];
+    bladeStrikeActive: boolean;
+    bladeStrikeTarget?: string;
     winner?: AvalonTeam;
     roleAssignments: Record<string, AvalonRole>;
 }
@@ -144,6 +147,9 @@ export interface AvalonPublicState {
         success: number;
         fail: number;
     };
+    bladeStrikeRequests: string[];
+    bladeStrikeActive: boolean;
+    bladeStrikeTarget?: string;
     winner?: AvalonTeam;
     winReason?: string;
 }

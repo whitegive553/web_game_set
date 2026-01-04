@@ -14,6 +14,7 @@ exports.roleConfigToPlayerCountConfig = roleConfigToPlayerCountConfig;
 exports.getRoleTeam = getRoleTeam;
 const avalon_1 = require("./types/avalon");
 exports.PLAYER_COUNT_REQUIREMENTS = {
+    5: { total: 5, good: 3, evil: 2 },
     6: { total: 6, good: 4, evil: 2 },
     7: { total: 7, good: 4, evil: 3 },
     8: { total: 8, good: 5, evil: 3 },
@@ -24,6 +25,13 @@ exports.PLAYER_COUNT_REQUIREMENTS = {
 // Quest Configurations (team sizes and fail requirements)
 // ============================================================================
 exports.QUEST_CONFIGURATIONS = {
+    5: [
+        { questNumber: 1, teamSize: 2, failsRequired: 1 },
+        { questNumber: 2, teamSize: 3, failsRequired: 1 },
+        { questNumber: 3, teamSize: 2, failsRequired: 1 },
+        { questNumber: 4, teamSize: 3, failsRequired: 1 },
+        { questNumber: 5, teamSize: 3, failsRequired: 1 },
+    ],
     6: [
         { questNumber: 1, teamSize: 2, failsRequired: 1 },
         { questNumber: 2, teamSize: 3, failsRequired: 1 },
@@ -64,6 +72,16 @@ exports.QUEST_CONFIGURATIONS = {
 // Default Role Configurations (按图示标准)
 // ============================================================================
 exports.DEFAULT_ROLE_CONFIGURATIONS = {
+    5: {
+        merlin: 1,
+        percival: 1,
+        loyalServant: 1,
+        assassin: 1,
+        morgana: 1,
+        mordred: 0,
+        oberon: 0,
+        minion: 0,
+    },
     6: {
         merlin: 1,
         percival: 1,
@@ -123,9 +141,9 @@ exports.DEFAULT_ROLE_CONFIGURATIONS = {
  */
 function validateRoleConfiguration(playerCount, roleConfig) {
     const errors = [];
-    // Check player count is supported (6-10 only)
-    if (playerCount < 6 || playerCount > 10) {
-        errors.push(`Player count must be between 6 and 10 (got ${playerCount})`);
+    // Check player count is supported (5-10 only)
+    if (playerCount < 5 || playerCount > 10) {
+        errors.push(`Player count must be between 5 and 10 (got ${playerCount})`);
         return { valid: false, errors };
     }
     const requirements = exports.PLAYER_COUNT_REQUIREMENTS[playerCount];
@@ -182,7 +200,7 @@ function validateRoleConfiguration(playerCount, roleConfig) {
  * Gets the default room configuration for a given player count
  */
 function getDefaultRoomConfig(playerCount) {
-    if (playerCount < 6 || playerCount > 10) {
+    if (playerCount < 5 || playerCount > 10) {
         return null;
     }
     return {
@@ -194,7 +212,7 @@ function getDefaultRoomConfig(playerCount) {
  * Gets the full player count configuration (roles + quests)
  */
 function getPlayerCountConfig(playerCount) {
-    if (playerCount < 6 || playerCount > 10) {
+    if (playerCount < 5 || playerCount > 10) {
         return null;
     }
     const requirements = exports.PLAYER_COUNT_REQUIREMENTS[playerCount];
