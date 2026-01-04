@@ -118,6 +118,20 @@ export const AvalonGame: React.FC = () => {
     return () => clearInterval(interval);
   }, [token, matchId]);
 
+  // Join WebSocket room when roomId is available
+  useEffect(() => {
+    const wsClient = getWebSocketClient();
+    if (!wsClient || !roomId) return;
+
+    console.log('[AvalonGame] Joining WebSocket room:', roomId);
+    wsClient.joinRoom(roomId);
+
+    return () => {
+      console.log('[AvalonGame] Leaving WebSocket room:', roomId);
+      wsClient.leaveRoom();
+    };
+  }, [roomId]);
+
   // Listen to WebSocket events
   useEffect(() => {
     const wsClient = getWebSocketClient();
