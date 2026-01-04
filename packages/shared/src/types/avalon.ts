@@ -126,6 +126,11 @@ export interface AvalonGameState {
   // Assassination
   assassinTarget?: string;    // userId
 
+  // Blade Strike (拍刀) - Early assassination
+  bladeStrikeRequests: string[];  // userIds who requested blade strike
+  bladeStrikeActive: boolean;     // Whether blade strike is currently active
+  bladeStrikeTarget?: string;     // userId targeted by blade strike
+
   // Winner
   winner?: AvalonTeam;
 
@@ -218,6 +223,11 @@ export interface AvalonPublicState {
     success: number;
     fail: number;
   };
+
+  // Blade Strike state
+  bladeStrikeRequests: string[];
+  bladeStrikeActive: boolean;
+  bladeStrikeTarget?: string;
 
   winner?: AvalonTeam;
   winReason?: string;

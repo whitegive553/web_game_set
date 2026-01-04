@@ -92,6 +92,14 @@ export class AvalonGame {
         console.log('[AvalonGame] Adding missing currentQuestTeamVotes to restored state');
         this.state.currentQuestTeamVotes = [];
       }
+      if (!this.state.bladeStrikeRequests) {
+        console.log('[AvalonGame] Adding missing bladeStrikeRequests to restored state');
+        this.state.bladeStrikeRequests = [];
+      }
+      if (this.state.bladeStrikeActive === undefined) {
+        console.log('[AvalonGame] Adding missing bladeStrikeActive to restored state');
+        this.state.bladeStrikeActive = false;
+      }
 
       // Fix old quest results that don't have teamVoteHistory
       if (this.state.questResults) {
@@ -130,6 +138,8 @@ export class AvalonGame {
       teamVotes: {},
       questVotes: {},
       currentQuestTeamVotes: [],
+      bladeStrikeRequests: [],
+      bladeStrikeActive: false,
       roleAssignments: {},
     };
   }
@@ -554,6 +564,194 @@ export class AvalonGame {
     }
   }
 
+  // ============================================================================
+  // Blade Strike (拍刀) - Early Assassination
+  // ============================================================================
+
+  /**
+   * Request blade strike (non-assassin evil players)
+   */
+  public handleRequestBladeStrike(userId: string): PluginGameEvent[] {
+    const role = this.state.roleAssignments[userId];
+    const team = this.getRoleTeam(role);
+
+    // Only evil team (except assassin) can request blade strike
+    if (team !== AvalonTeam.EVIL || role === AvalonRole.ASSASSIN) {
+      throw new Error('Only non-assassin evil players can request blade strike');
+    }
+
+    // Check if game is in a valid phase (not lobby or game over)
+    if (this.state.phase === AvalonPhase.LOBBY || this.state.phase === AvalonPhase.GAME_OVER) {
+      throw new Error('Cannot request blade strike in current phase');
+    }
+
+    // Check if already requested
+    if (this.state.bladeStrikeRequests.includes(userId)) {
+      throw new Error('Already requested blade strike');
+    }
+
+    // Add to requests
+    this.state.bladeStrikeRequests.push(userId);
+
+    const event: PluginGameEvent = {
+      eventId: `event_${Date.now()}`,
+      matchId: this.match.matchId,
+      gameId: 'avalon',
+      timestamp: Date.now(),
+      type: 'BLADE_STRIKE_REQUESTED',
+      payload: {
+        requesterId: userId,
+        requesterUsername: this.match.players.find(p => p.userId === userId)?.username,
+      },
+      visibleTo: 'all',
+      userId: this.getAssassinUserId(), // Send to assassin
+    };
+
+    this.events.push(event);
+    this.syncStateToMatch();
+    return [event];
+  }
+
+  /**
+   * Assassin responds to blade strike request
+   */
+  public async handleBladeStrikeDecision(userId: string, accept: boolean): Promise<PluginGameEvent[]> {
+    const role = this.state.roleAssignments[userId];
+
+    if (role !== AvalonRole.ASSASSIN) {
+      throw new Error('Only assassin can respond to blade strike request');
+    }
+
+    const events: PluginGameEvent[] = [];
+
+    if (accept) {
+      // Start blade strike
+      return this.startBladeStrike(userId);
+    } else {
+      // Reject blade strike request
+      const event: PluginGameEvent = {
+        eventId: `event_${Date.now()}`,
+        matchId: this.match.matchId,
+        gameId: 'avalon',
+        timestamp: Date.now(),
+        type: 'BLADE_STRIKE_REJECTED',
+        payload: {},
+        visibleTo: 'all',
+      };
+
+      // Clear requests
+      this.state.bladeStrikeRequests = [];
+
+      this.events.push(event);
+      this.syncStateToMatch();
+      return [event];
+    }
+  }
+
+  /**
+   * Assassin initiates blade strike directly
+   */
+  public async handleBladeStrike(userId: string): Promise<PluginGameEvent[]> {
+    const role = this.state.roleAssignments[userId];
+
+    if (role !== AvalonRole.ASSASSIN) {
+      throw new Error('Only assassin can initiate blade strike');
+    }
+
+    // Check if game is in a valid phase
+    if (this.state.phase === AvalonPhase.LOBBY || this.state.phase === AvalonPhase.GAME_OVER) {
+      throw new Error('Cannot initiate blade strike in current phase');
+    }
+
+    return this.startBladeStrike(userId);
+  }
+
+  /**
+   * Start blade strike phase
+   */
+  private startBladeStrike(assassinId: string): PluginGameEvent[] {
+    this.state.bladeStrikeActive = true;
+
+    const event: PluginGameEvent = {
+      eventId: `event_${Date.now()}`,
+      matchId: this.match.matchId,
+      gameId: 'avalon',
+      timestamp: Date.now(),
+      type: 'BLADE_STRIKE_STARTED',
+      payload: {
+        assassin: assassinId,
+        assassinUsername: this.match.players.find(p => p.userId === assassinId)?.username,
+      },
+      visibleTo: 'all',
+    };
+
+    this.events.push(event);
+    this.syncStateToMatch();
+    return [event];
+  }
+
+  /**
+   * Execute blade strike assassination
+   */
+  public async handleBladeStrikeTarget(userId: string, targetUserId: string): Promise<PluginGameEvent[]> {
+    if (!this.state.bladeStrikeActive) {
+      throw new Error('Blade strike not active');
+    }
+
+    const role = this.state.roleAssignments[userId];
+    if (role !== AvalonRole.ASSASSIN) {
+      throw new Error('Only assassin can execute blade strike');
+    }
+
+    const targetRole = this.state.roleAssignments[targetUserId];
+    const hitMerlin = targetRole === AvalonRole.MERLIN;
+
+    this.state.bladeStrikeTarget = targetUserId;
+
+    const events: PluginGameEvent[] = [{
+      eventId: `event_${Date.now()}`,
+      matchId: this.match.matchId,
+      gameId: 'avalon',
+      timestamp: Date.now(),
+      type: 'BLADE_STRIKE_TARGET',
+      payload: {
+        assassin: userId,
+        target: targetUserId,
+        targetUsername: this.match.players.find(p => p.userId === targetUserId)?.username,
+        targetRole,
+        hitMerlin,
+      },
+      visibleTo: 'all',
+    }];
+
+    // Record blade strike in history (reuse assassination recording)
+    this.historyService?.onAssassination(this.match.matchId, {
+      assassinUserId: userId,
+      targetUserId,
+      targetRole,
+      success: hitMerlin,
+      players: this.match.players,
+      isBladeStrike: true
+    }).catch(err => console.error('[AvalonHistory] Failed to record blade strike:', err));
+
+    // Blade strike immediately ends the game
+    if (hitMerlin) {
+      return events.concat(await this.endGame(AvalonTeam.EVIL, 'Merlin killed by blade strike'));
+    } else {
+      return events.concat(await this.endGame(AvalonTeam.GOOD, 'Merlin survived blade strike'));
+    }
+  }
+
+  /**
+   * Get assassin's userId
+   */
+  private getAssassinUserId(): string | undefined {
+    const assassinEntry = Object.entries(this.state.roleAssignments).find(
+      ([_, role]) => role === AvalonRole.ASSASSIN
+    );
+    return assassinEntry ? assassinEntry[0] : undefined;
+  }
+
   private startAssassination(): PluginGameEvent[] {
     this.state.phase = AvalonPhase.ASSASSINATION;
 
@@ -643,6 +841,9 @@ export class AvalonGame {
       nominatedTeam: this.state.nominatedTeam.length > 0 ? this.state.nominatedTeam : undefined,
       teamVotes: Object.keys(this.state.teamVotes).length > 0 ? this.state.teamVotes : undefined,
       questVoteCount,
+      bladeStrikeRequests: this.state.bladeStrikeRequests,
+      bladeStrikeActive: this.state.bladeStrikeActive,
+      bladeStrikeTarget: this.state.bladeStrikeTarget,
       winner: this.state.winner,
     };
   }

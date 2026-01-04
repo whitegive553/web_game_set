@@ -382,6 +382,22 @@ router.post('/:matchId/action', requireAuth, async (req: Request, res: Response)
         events = await avalonGame.handleAssassinate(userId, payload.targetUserId);
         break;
 
+      case 'REQUEST_BLADE_STRIKE':
+        events = avalonGame.handleRequestBladeStrike(userId);
+        break;
+
+      case 'BLADE_STRIKE_DECISION':
+        events = await avalonGame.handleBladeStrikeDecision(userId, payload.accept);
+        break;
+
+      case 'BLADE_STRIKE':
+        events = await avalonGame.handleBladeStrike(userId);
+        break;
+
+      case 'BLADE_STRIKE_TARGET':
+        events = await avalonGame.handleBladeStrikeTarget(userId, payload.targetUserId);
+        break;
+
       default:
         res.status(400).json({
           success: false,

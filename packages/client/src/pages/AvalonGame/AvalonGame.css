@@ -851,3 +851,395 @@
     font-size: 1.3rem;
   }
 }
+
+/* ====================
+   Blade Strike (拍刀)
+   ==================== */
+
+.blade-strike-button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
+  border: 2px solid #b71c1c;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(211, 47, 47, 0.4);
+}
+
+.blade-strike-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(211, 47, 47, 0.6);
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+}
+
+.blade-strike-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(211, 47, 47, 0.4);
+}
+
+.blade-strike-button.request {
+  background: linear-gradient(135deg, #ff6f00 0%, #ff5722 100%);
+  border-color: #e64a19;
+  box-shadow: 0 4px 15px rgba(255, 111, 0, 0.4);
+}
+
+.blade-strike-button.request:hover {
+  background: linear-gradient(135deg, #ff9800 0%, #ff6f00 100%);
+  box-shadow: 0 6px 20px rgba(255, 111, 0, 0.6);
+}
+
+/* Blade Strike Request Notification */
+.blade-strike-request-notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.95);
+  border: 3px solid #ff5722;
+  border-radius: 15px;
+  padding: 30px;
+  min-width: 400px;
+  box-shadow: 0 0 50px rgba(255, 87, 34, 0.8);
+  z-index: 1000;
+  animation: bladeStrikeAppear 0.5s ease-out;
+}
+
+@keyframes bladeStrikeAppear {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.blade-strike-request-notification h3 {
+  color: #ff5722;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.blade-strike-request-notification p {
+  color: #fff;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.blade-strike-decision-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.blade-strike-decision-buttons button {
+  padding: 12px 30px;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.blade-strike-decision-buttons .accept-btn {
+  background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(211, 47, 47, 0.4);
+}
+
+.blade-strike-decision-buttons .accept-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(211, 47, 47, 0.6);
+}
+
+.blade-strike-decision-buttons .reject-btn {
+  background: linear-gradient(135deg, #757575 0%, #616161 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(117, 117, 117, 0.4);
+}
+
+.blade-strike-decision-buttons .reject-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(117, 117, 117, 0.6);
+}
+
+/* Blade Strike Started Full Screen Effect */
+.blade-strike-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle, rgba(211, 47, 47, 0.9) 0%, rgba(0, 0, 0, 0.95) 70%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: bladeStrikeFlash 0.5s ease-out;
+}
+
+@keyframes bladeStrikeFlash {
+  0% {
+    background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(211, 47, 47, 0) 100%);
+  }
+  50% {
+    background: radial-gradient(circle, rgba(211, 47, 47, 1) 0%, rgba(0, 0, 0, 0.5) 50%);
+  }
+  100% {
+    background: radial-gradient(circle, rgba(211, 47, 47, 0.9) 0%, rgba(0, 0, 0, 0.95) 70%);
+  }
+}
+
+.blade-strike-fullscreen h1 {
+  font-size: 4rem;
+  color: #fff;
+  text-shadow: 0 0 30px rgba(211, 47, 47, 0.8);
+  margin-bottom: 20px;
+  animation: bladePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes bladePulse {
+  0%, 100% {
+    transform: scale(1);
+    text-shadow: 0 0 30px rgba(211, 47, 47, 0.8);
+  }
+  50% {
+    transform: scale(1.05);
+    text-shadow: 0 0 50px rgba(211, 47, 47, 1);
+  }
+}
+
+.blade-strike-fullscreen p {
+  font-size: 1.8rem;
+  color: #ffccbc;
+  text-shadow: 0 0 10px rgba(255, 87, 34, 0.6);
+}
+
+/* Blade Strike Target Effect */
+.blade-strike-target-effect {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2001;
+  animation: targetReveal 0.8s ease-out;
+}
+
+@keyframes targetReveal {
+  0% {
+    background: rgba(0, 0, 0, 0);
+  }
+  50% {
+    background: rgba(0, 0, 0, 0.7);
+  }
+  100% {
+    background: rgba(0, 0, 0, 0.95);
+  }
+}
+
+.blade-strike-target-effect h2 {
+  font-size: 2.5rem;
+  color: #fff;
+  margin-bottom: 30px;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+.blade-strike-target-effect .target-name {
+  font-size: 3.5rem;
+  font-weight: bold;
+  color: #ff5722;
+  text-shadow: 0 0 40px rgba(255, 87, 34, 0.9);
+  margin-bottom: 40px;
+  animation: targetPulse 1s ease-in-out;
+}
+
+@keyframes targetPulse {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Blade Strike Result Effects */
+.blade-strike-result {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2002;
+}
+
+.blade-strike-result.success {
+  background: radial-gradient(circle, rgba(211, 47, 47, 0.95) 0%, rgba(0, 0, 0, 0.98) 70%);
+  animation: successFlash 1s ease-out;
+}
+
+.blade-strike-result.failure {
+  background: radial-gradient(circle, rgba(76, 175, 80, 0.95) 0%, rgba(0, 0, 0, 0.98) 70%);
+  animation: failureFlash 1s ease-out;
+}
+
+@keyframes successFlash {
+  0%, 20%, 40%, 60%, 80% {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, rgba(211, 47, 47, 0.5) 50%);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    background: radial-gradient(circle, rgba(211, 47, 47, 0.95) 0%, rgba(0, 0, 0, 0.98) 70%);
+  }
+  100% {
+    background: radial-gradient(circle, rgba(211, 47, 47, 0.95) 0%, rgba(0, 0, 0, 0.98) 70%);
+  }
+}
+
+@keyframes failureFlash {
+  0%, 20%, 40%, 60%, 80% {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, rgba(76, 175, 80, 0.5) 50%);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    background: radial-gradient(circle, rgba(76, 175, 80, 0.95) 0%, rgba(0, 0, 0, 0.98) 70%);
+  }
+  100% {
+    background: radial-gradient(circle, rgba(76, 175, 80, 0.95) 0%, rgba(0, 0, 0, 0.98) 70%);
+  }
+}
+
+.blade-strike-result h1 {
+  font-size: 4.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-shadow: 0 0 50px currentColor;
+  animation: resultBounce 1s ease-out;
+}
+
+@keyframes resultBounce {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.blade-strike-result.success h1 {
+  color: #ff1744;
+}
+
+.blade-strike-result.failure h1 {
+  color: #4caf50;
+}
+
+.blade-strike-result p {
+  font-size: 1.8rem;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+/* Confirmation Modal for Blade Strike */
+.blade-strike-confirm-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.95);
+  border: 2px solid #ff5722;
+  border-radius: 12px;
+  padding: 30px;
+  min-width: 350px;
+  box-shadow: 0 0 40px rgba(255, 87, 34, 0.6);
+  z-index: 1500;
+  animation: modalAppear 0.3s ease-out;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.blade-strike-confirm-modal h3 {
+  color: #ff5722;
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+.blade-strike-confirm-modal p {
+  color: #fff;
+  margin-bottom: 25px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.blade-strike-confirm-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.blade-strike-confirm-buttons button {
+  padding: 10px 25px;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.blade-strike-confirm-buttons .confirm-btn {
+  background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
+  color: white;
+}
+
+.blade-strike-confirm-buttons .confirm-btn:hover {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  transform: translateY(-1px);
+}
+
+.blade-strike-confirm-buttons .cancel-btn {
+  background: linear-gradient(135deg, #757575 0%, #616161 100%);
+  color: white;
+}
+
+.blade-strike-confirm-buttons .cancel-btn:hover {
+  background: linear-gradient(135deg, #9e9e9e 0%, #757575 100%);
+  transform: translateY(-1px);
+}
