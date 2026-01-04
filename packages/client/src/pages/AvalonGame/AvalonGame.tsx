@@ -123,6 +123,60 @@ export const AvalonGame: React.FC = () => {
     const wsClient = getWebSocketClient();
     if (!wsClient) return;
 
+    const handleGameEvent = (payload: any) => {
+      console.log('[AvalonGame] Game event:', payload);
+
+      // Handle blade strike events
+      if (payload.type === 'BLADE_STRIKE_REQUESTED') {
+        // Store request info - UI will decide whether to show based on current role
+        console.log('[AvalonGame] Blade strike requested by:', payload.payload.requesterUsername);
+        setBladeStrikeRequestInfo({ username: payload.payload.requesterUsername });
+      } else if (payload.type === 'BLADE_STRIKE_STARTED') {
+        // Show to all players
+        console.log('[AvalonGame] Blade strike started by:', payload.payload.assassinUsername);
+        setBladeStrikeStartedBy(payload.payload.assassinUsername);
+        setBladeStrikeShowStarted(true);
+        setTimeout(() => {
+          setBladeStrikeShowStarted(false);
+        }, 3000);
+      } else if (payload.type === 'BLADE_STRIKE_TARGET') {
+        // Show target reveal
+        console.log('[AvalonGame] Blade strike target:', payload.payload);
+        setBladeStrikeTargetInfo({
+          target: payload.payload.targetUsername,
+          targetRole: payload.payload.targetRole,
+          hitMerlin: payload.payload.hitMerlin
+        });
+        setBladeStrikeShowTarget(true);
+
+        // Show target for 3 seconds, then show result
+        setTimeout(() => {
+          setBladeStrikeShowTarget(false);
+          setBladeStrikeShowResult(true);
+
+          // Show result for 5 seconds
+          setTimeout(() => {
+            setBladeStrikeShowResult(false);
+          }, 5000);
+        }, 3000);
+      } else if (payload.type === 'BLADE_STRIKE_REJECTED') {
+        // Clear request notification
+        console.log('[AvalonGame] Blade strike rejected');
+        setBladeStrikeRequestInfo(null);
+      }
+
+      fetchGameState();
+    };
+
+    const handlePrivateState = (payload: any) => {
+      console.log('[AvalonGame] Private state:', payload);
+      if (payload.payload) {
+        setPrivateState(payload.payload);
+      } else {
+        setPrivateState(payload);
+      }
+    };
+
     wsClient.on('GAME_EVENT', handleGameEvent);
     wsClient.on('PRIVATE_STATE', handlePrivateState);
 
@@ -130,59 +184,7 @@ export const AvalonGame: React.FC = () => {
       wsClient.off('GAME_EVENT', handleGameEvent);
       wsClient.off('PRIVATE_STATE', handlePrivateState);
     };
-  }, []);
-
-  const handleGameEvent = (payload: any) => {
-    console.log('[AvalonGame] Game event:', payload);
-
-    // Handle blade strike events
-    if (payload.type === 'BLADE_STRIKE_REQUESTED') {
-      // Only show to assassin
-      if (privateState?.role === 'assassin') {
-        setBladeStrikeRequestInfo({ username: payload.payload.requesterUsername });
-      }
-    } else if (payload.type === 'BLADE_STRIKE_STARTED') {
-      // Show to all players
-      setBladeStrikeStartedBy(payload.payload.assassinUsername);
-      setBladeStrikeShowStarted(true);
-      setTimeout(() => {
-        setBladeStrikeShowStarted(false);
-      }, 3000);
-    } else if (payload.type === 'BLADE_STRIKE_TARGET') {
-      // Show target reveal
-      setBladeStrikeTargetInfo({
-        target: payload.payload.targetUsername,
-        targetRole: payload.payload.targetRole,
-        hitMerlin: payload.payload.hitMerlin
-      });
-      setBladeStrikeShowTarget(true);
-
-      // Show target for 3 seconds, then show result
-      setTimeout(() => {
-        setBladeStrikeShowTarget(false);
-        setBladeStrikeShowResult(true);
-
-        // Show result for 5 seconds
-        setTimeout(() => {
-          setBladeStrikeShowResult(false);
-        }, 5000);
-      }, 3000);
-    } else if (payload.type === 'BLADE_STRIKE_REJECTED') {
-      // Clear request notification
-      setBladeStrikeRequestInfo(null);
-    }
-
-    fetchGameState();
-  };
-
-  const handlePrivateState = (payload: any) => {
-    console.log('[AvalonGame] Private state:', payload);
-    if (payload.payload) {
-      setPrivateState(payload.payload);
-    } else {
-      setPrivateState(payload);
-    }
-  };
+  }, [token, matchId]);
 
   const fetchGameState = async () => {
     if (!token || !matchId) return;
