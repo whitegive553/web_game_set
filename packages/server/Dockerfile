@@ -40,8 +40,20 @@ RUN echo "=== Building dependencies ===" && \
 
 # 验证 games 构建产物
 RUN echo "=== Verifying games dist structure ===" && \
+    echo "Contents of packages/games/dist:" && \
+    ls -laR packages/games/dist/ && \
+    echo "Checking package.json main field:" && \
+    cat packages/games/package.json | grep main && \
     test -f packages/games/dist/games/src/index.js && echo "✓ games/dist/games/src/index.js exists" || \
-    (echo "ERROR: games/dist/games/src/index.js not found" && ls -la packages/games/dist/ && exit 1)
+    (echo "ERROR: games/dist/games/src/index.js not found" && exit 1) && \
+    echo "Testing module loading:" && \
+    node -e "const pkg = require('./packages/games/package.json'); console.log('Main:', pkg.main); const mod = require('./packages/games/dist/games/src/index.js'); console.log('AvalonGame:', !!mod.AvalonGame);"
+
+# 重新安装以确保符号链接指向正确的编译产物
+RUN echo "=== Re-linking node_modules ===" && \
+    rm -rf node_modules/@survival-game && \
+    npm install && \
+    echo "✓ Dependencies re-linked"
 
 # 现在构建 server（依赖已准备好）
 RUN echo "=== Building server ===" && \
