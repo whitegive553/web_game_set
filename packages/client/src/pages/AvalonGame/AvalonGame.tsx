@@ -34,6 +34,9 @@ interface PublicState {
     success: number;
     fail: number;
   };
+  bladeStrikeRequests: string[];
+  bladeStrikeActive: boolean;
+  bladeStrikeTarget?: string;
   winner?: string;
   winReason?: string;
 }
@@ -69,6 +72,15 @@ export const AvalonGame: React.FC = () => {
   const [roleConfirmed, setRoleConfirmed] = useState(false);
   const [roleCardFlipped, setRoleCardFlipped] = useState(false);
   const [countdownStarted, setCountdownStarted] = useState(false);
+
+  // Blade Strike states
+  const [bladeStrikeShowConfirm, setBladeStrikeShowConfirm] = useState<'request' | 'direct' | 'accept' | null>(null);
+  const [bladeStrikeRequestInfo, setBladeStrikeRequestInfo] = useState<{username: string} | null>(null);
+  const [bladeStrikeShowStarted, setBladeStrikeShowStarted] = useState(false);
+  const [bladeStrikeStartedBy, setBladeStrikeStartedBy] = useState<string | null>(null);
+  const [bladeStrikeShowTarget, setBladeStrikeShowTarget] = useState(false);
+  const [bladeStrikeTargetInfo, setBladeStrikeTargetInfo] = useState<{target: string; targetRole: string; hitMerlin: boolean} | null>(null);
+  const [bladeStrikeShowResult, setBladeStrikeShowResult] = useState(false);
 
   // Reset countdown when phase changes to ROLE_REVEAL
   useEffect(() => {
@@ -122,6 +134,44 @@ export const AvalonGame: React.FC = () => {
 
   const handleGameEvent = (payload: any) => {
     console.log('[AvalonGame] Game event:', payload);
+
+    // Handle blade strike events
+    if (payload.type === 'BLADE_STRIKE_REQUESTED') {
+      // Only show to assassin
+      if (privateState?.role === 'assassin') {
+        setBladeStrikeRequestInfo({ username: payload.payload.requesterUsername });
+      }
+    } else if (payload.type === 'BLADE_STRIKE_STARTED') {
+      // Show to all players
+      setBladeStrikeStartedBy(payload.payload.assassinUsername);
+      setBladeStrikeShowStarted(true);
+      setTimeout(() => {
+        setBladeStrikeShowStarted(false);
+      }, 3000);
+    } else if (payload.type === 'BLADE_STRIKE_TARGET') {
+      // Show target reveal
+      setBladeStrikeTargetInfo({
+        target: payload.payload.targetUsername,
+        targetRole: payload.payload.targetRole,
+        hitMerlin: payload.payload.hitMerlin
+      });
+      setBladeStrikeShowTarget(true);
+
+      // Show target for 3 seconds, then show result
+      setTimeout(() => {
+        setBladeStrikeShowTarget(false);
+        setBladeStrikeShowResult(true);
+
+        // Show result for 5 seconds
+        setTimeout(() => {
+          setBladeStrikeShowResult(false);
+        }, 5000);
+      }, 3000);
+    } else if (payload.type === 'BLADE_STRIKE_REJECTED') {
+      // Clear request notification
+      setBladeStrikeRequestInfo(null);
+    }
+
     fetchGameState();
   };
 
@@ -221,6 +271,23 @@ export const AvalonGame: React.FC = () => {
 
   const assassinate = (targetUserId: string) => {
     performAction('ASSASSINATE', { targetUserId });
+  };
+
+  // Blade Strike actions
+  const requestBladeStrike = () => {
+    performAction('REQUEST_BLADE_STRIKE', {});
+  };
+
+  const respondToBladeStrikeRequest = (accept: boolean) => {
+    performAction('BLADE_STRIKE_DECISION', { accept });
+  };
+
+  const initiateBladeStrike = () => {
+    performAction('BLADE_STRIKE', {});
+  };
+
+  const selectBladeStrikeTarget = (targetUserId: string) => {
+    performAction('BLADE_STRIKE_TARGET', { targetUserId });
   };
 
   const handleExitGame = async () => {
@@ -522,6 +589,37 @@ export const AvalonGame: React.FC = () => {
                   ))}
                 </div>
               )}
+
+              {/* Blade Strike Buttons - Only show if role card is flipped and game is active */}
+              {roleCardFlipped && publicState.phase !== 'LOBBY' && publicState.phase !== 'GAME_OVER' && !publicState.bladeStrikeActive && (
+                <>
+                  {/* Assassin: Direct blade strike button */}
+                  {privateState.role === 'assassin' && (
+                    <button
+                      className="blade-strike-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setBladeStrikeShowConfirm('direct');
+                      }}
+                    >
+                      {t('avalonGame.bladeStrike')}
+                    </button>
+                  )}
+
+                  {/* Non-assassin evil: Request blade strike button */}
+                  {privateState.team === 'evil' && privateState.role !== 'assassin' && !publicState.bladeStrikeRequests.includes(user?.id || '') && (
+                    <button
+                      className="blade-strike-button request"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setBladeStrikeShowConfirm('request');
+                      }}
+                    >
+                      {t('avalonGame.requestBladeStrike')}
+                    </button>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -651,8 +749,27 @@ export const AvalonGame: React.FC = () => {
             </div>
           )}
 
+          {/* Blade Strike Target Selection */}
+          {publicState.bladeStrikeActive && privateState.role === 'assassin' && !publicState.bladeStrikeTarget && (
+            <div className="action-panel blade-strike-selection">
+              <h3>{t('avalonGame.bladeStrikeSelectTarget')}</h3>
+              <div className="player-selection-grid">
+                {players.filter(p => p.userId !== user?.id).map(player => (
+                  <button
+                    key={player.userId}
+                    className="player-select-btn blade-strike-target"
+                    onClick={() => selectBladeStrikeTarget(player.userId)}
+                    disabled={loading}
+                  >
+                    {player.username}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Waiting State */}
-          {!canNominate && !canVoteTeam && !canVoteQuest && !canAssassinate && publicState.phase !== 'GAME_OVER' && (
+          {!canNominate && !canVoteTeam && !canVoteQuest && !canAssassinate && publicState.phase !== 'GAME_OVER' && !publicState.bladeStrikeActive && (
             <div className="waiting-panel">
               <p>{t('avalonGame.waitingForOthers')}</p>
               {publicState.phase === 'NOMINATION' && (
@@ -667,6 +784,13 @@ export const AvalonGame: React.FC = () => {
               {publicState.phase === 'ASSASSINATION' && !canAssassinate && (
                 <p>{t('avalonGame.assassinSelecting')}</p>
               )}
+            </div>
+          )}
+
+          {/* Blade Strike Waiting State */}
+          {publicState.bladeStrikeActive && (privateState.role !== 'assassin' || publicState.bladeStrikeTarget) && (
+            <div className="waiting-panel blade-strike-waiting">
+              <p>{t('avalonGame.waitingForBladeStrikeTarget')}</p>
             </div>
           )}
 
@@ -712,6 +836,141 @@ export const AvalonGame: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Blade Strike Request Notification (for Assassin) */}
+      {bladeStrikeRequestInfo && privateState?.role === 'assassin' && (
+        <div className="blade-strike-request-notification">
+          <div className="notification-content">
+            <h3>{t('avalonGame.bladeStrikeRequested', { username: bladeStrikeRequestInfo.username })}</h3>
+            <div className="notification-buttons">
+              <button
+                className="btn-accept"
+                onClick={() => setBladeStrikeShowConfirm('accept')}
+              >
+                {t('avalonGame.acceptBladeStrike')}
+              </button>
+              <button
+                className="btn-reject"
+                onClick={() => {
+                  respondToBladeStrikeRequest(false);
+                  setBladeStrikeRequestInfo(null);
+                }}
+              >
+                {t('avalonGame.rejectBladeStrike')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Blade Strike Confirmation Modals */}
+      {bladeStrikeShowConfirm && (
+        <div className="blade-strike-confirm-modal" onClick={() => setBladeStrikeShowConfirm(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            {bladeStrikeShowConfirm === 'request' && (
+              <>
+                <h3>{t('avalonGame.confirmRequestBladeStrike')}</h3>
+                <p>{t('avalonGame.confirmRequestBladeStrikeMessage')}</p>
+                <div className="modal-buttons">
+                  <button
+                    className="btn-confirm"
+                    onClick={() => {
+                      requestBladeStrike();
+                      setBladeStrikeShowConfirm(null);
+                    }}
+                  >
+                    {t('common.confirm')}
+                  </button>
+                  <button
+                    className="btn-cancel"
+                    onClick={() => setBladeStrikeShowConfirm(null)}
+                  >
+                    {t('common.cancel')}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {bladeStrikeShowConfirm === 'direct' && (
+              <>
+                <h3>{t('avalonGame.confirmBladeStrike')}</h3>
+                <p>{t('avalonGame.confirmBladeStrikeMessage')}</p>
+                <div className="modal-buttons">
+                  <button
+                    className="btn-confirm"
+                    onClick={() => {
+                      initiateBladeStrike();
+                      setBladeStrikeShowConfirm(null);
+                    }}
+                  >
+                    {t('common.confirm')}
+                  </button>
+                  <button
+                    className="btn-cancel"
+                    onClick={() => setBladeStrikeShowConfirm(null)}
+                  >
+                    {t('common.cancel')}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {bladeStrikeShowConfirm === 'accept' && (
+              <>
+                <h3>{t('avalonGame.confirmAcceptBladeStrike')}</h3>
+                <p>{t('avalonGame.confirmAcceptBladeStrikeMessage')}</p>
+                <div className="modal-buttons">
+                  <button
+                    className="btn-confirm"
+                    onClick={() => {
+                      respondToBladeStrikeRequest(true);
+                      setBladeStrikeRequestInfo(null);
+                      setBladeStrikeShowConfirm(null);
+                    }}
+                  >
+                    {t('common.confirm')}
+                  </button>
+                  <button
+                    className="btn-cancel"
+                    onClick={() => setBladeStrikeShowConfirm(null)}
+                  >
+                    {t('common.cancel')}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Blade Strike Started Full-Screen Effect */}
+      {bladeStrikeShowStarted && (
+        <div className="blade-strike-fullscreen">
+          <div className="fullscreen-content">
+            <h1>{t('avalonGame.bladeStrikeStarted')}</h1>
+            <p>{t('avalonGame.bladeStrikeStartedDesc', { assassin: bladeStrikeStartedBy })}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Blade Strike Target Reveal Effect */}
+      {bladeStrikeShowTarget && bladeStrikeTargetInfo && (
+        <div className="blade-strike-target-effect">
+          <div className="target-content">
+            <h2>{t('avalonGame.bladeStrikeTarget', { target: bladeStrikeTargetInfo.target })}</h2>
+            <div className="target-role">{getRoleDisplayName(bladeStrikeTargetInfo.targetRole)}</div>
+          </div>
+        </div>
+      )}
+
+      {/* Blade Strike Result Effect */}
+      {bladeStrikeShowResult && bladeStrikeTargetInfo && (
+        <div className={`blade-strike-result ${bladeStrikeTargetInfo.hitMerlin ? 'success' : 'failed'}`}>
+          <div className="result-content">
+            <h1>{bladeStrikeTargetInfo.hitMerlin ? t('avalonGame.bladeStrikeSuccess') : t('avalonGame.bladeStrikeFailed')}</h1>
+          </div>
+        </div>
+      )}
 
       {/* Help Modal */}
       <AvalonHelp isOpen={showHelp} onClose={() => setShowHelp(false)} />
