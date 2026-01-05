@@ -1,0 +1,11 @@
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-multipart==0.0.20
+pydantic==2.10.5
+
+# 未来需要的依赖 (目前未使用)
+# langchain==0.3.13
+# langchain-openai==0.2.14
+# weaviate-client==4.9.6
+# python-pptx==1.0.2
+# pypdf==5.1.0

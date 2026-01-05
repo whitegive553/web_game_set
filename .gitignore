@@ -3,6 +3,19 @@ node_modules/
 # package-lock.json  # 注释掉，生产环境需要此文件确保依赖版本一致
 yarn.lock
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
 # Build outputs
 dist/
 build/

@@ -17,6 +17,7 @@ import { GameLobby } from './pages/GameLobby/GameLobby';
 import { AvalonRoom } from './pages/AvalonRoom/AvalonRoom';
 import { AvalonGame } from './pages/AvalonGame/AvalonGame';
 import { AvalonGameDetail } from './pages/History/AvalonGameDetail';
+import { AIAgentPage } from './pages/AIAgent/AIAgentPage';
 import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
 import './i18n/config'; // Initialize i18n
 import './App.css';
@@ -124,6 +125,9 @@ function App() {
 
             {/* Scene demo (for testing phase 4 systems) */}
             <Route path="/demo" element={<SceneDemoPage />} />
+
+            {/* AI Agent page (SSE streaming demo) */}
+            <Route path="/ai_agent" element={<AIAgentPage />} />
           </Routes>
         </GameProvider>
       </AuthProvider>
