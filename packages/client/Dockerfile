@@ -5,6 +5,12 @@ FROM node:18-alpine AS base
 FROM base AS dependencies
 WORKDIR /app
 
+# 配置 Alpine 使用阿里云镜像源（国内服务器加速）
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+
+# 配置 npm 使用淘宝镜像加速（国内服务器）
+RUN npm config set registry https://registry.npmmirror.com
+
 # 复制 package.json 文件
 COPY package.json package-lock.json* ./
 COPY packages/client/package.json ./packages/client/

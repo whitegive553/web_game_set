@@ -5,6 +5,9 @@ FROM node:18-alpine AS base
 FROM base AS build
 WORKDIR /app
 
+# 配置 Alpine 使用阿里云镜像源（国内服务器加速）
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+
 # 安装编译工具（bcrypt 等原生模块需要）
 RUN apk add --no-cache python3 make g++
 
@@ -58,6 +61,9 @@ WORKDIR /app
 # 生产阶段
 FROM base AS production
 WORKDIR /app
+
+# 配置 Alpine 使用阿里云镜像源（国内服务器加速）
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
 # 安装生产运行时依赖（bcrypt 需要）
 RUN apk add --no-cache python3 make g++
